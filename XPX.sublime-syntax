@@ -1,0 +1,129 @@
+%YAML 1.2
+---
+name: XPX
+file_extensions:
+  - xpx
+  - phc
+scope: text.html.xpx
+
+contexts:
+  main:
+    - match: ""
+      push: Packages/HTML/HTML.sublime-syntax
+      with_prototype:
+        - include: xpx-comment
+        - include: xpx-javascript
+        - include: xpx-tag
+        # Permettre la reconnaissance des variables dans le HTML.
+        - match: '\$'
+          push: xpx-variable
+
+  # Permettre de placer le code XPX en commentaire en scope comment.
+  xpx-comment:
+    - match: <!--
+      scope: punctuation.definition.comment.html
+      push:
+        - meta_scope: comment.block.html
+        - match: '--\s*>'
+          pop: true
+        - match: "--"
+          scope: invalid.illegal.bad-comments-or-CDATA.html
+
+  # Permettre d'isoler les variables XPX dans les blocs de type text/javascript.
+  xpx-javascript:
+    - match: '(<)((?i:script))\b(?![^>]*/>)(?![^>]*(?i:type.?=.?text/((?!javascript).*)))'
+      captures:
+        1: punctuation.definition.tag.begin.html
+        2: entity.name.tag.script.html
+      push:
+        - match: (?i)(</)(script)(>)
+          captures:
+            1: punctuation.definition.tag.begin.html
+            2: entity.name.tag.script.html
+            3: punctuation.definition.tag.end.html
+          pop: true
+        - include: 'scope:text.html.basic#tag-stuff'
+        - match: '>'
+          scope: punctuation.definition.tag.end.html
+          push:
+            - meta_content_scope: source.js.embedded.html
+            - include: 'scope:source.js'
+          with_prototype:
+            - match: '\$'
+              push: xpx-variable
+            - match: (?i)(?=</script)
+              pop: true
+
+  # Définir une région (scope) balise XPX par mot-clé.
+  xpx-tag:
+    - match: (</?)((?i:cond|cookie|connect|create|debug|else|file|function|get|http|include|mail|noparse|pdf|pict|scope|set|sql|system|while)\b)
+      captures:
+        1: punctuation.definition.tag.begin.html
+        2: entity.name.tag.xpx
+      push:
+        - meta_scope: meta.tag.block.any.html
+        - match: '(?: ?/)?>'
+          scope: punctuation.definition.tag.end.html
+          pop: true
+        - include: xpx-attribute
+        - include: xpx-attribute-query
+
+  # Définir une région (scope) d'une propriété de balise XPX par mot-clé.
+  xpx-attribute:
+    - match: '\s+\b((align|addpage|base|bgcolor|bit|bitoff|biton|border|by|cc|cci|charset|close|color|content|datetime|decode64|delete|dest|dir|domain|encode64|eol|exec|exist|expr|file|font|format|frame|from|get|geth|getw|getx|gety|gettext|global|href|info|join|keycode|lang|leading|len|line|local|lowcase|ltrim|maxrows|mode|model|money|msg|name|noaccent|open|option|padding|pass|path|port|rand|read|rect|replace|reply|rotate|round|rtrim|server|size|smtp|socket|start|strcode|strdecode|strescape|style|subject|text|timeout|trim|ttl|to|token|type|upcase|urlcode|value|write|xmlcode|xpx)\b\s*(=)\s*)'
+      captures:
+        1: meta.attribute-with-value.html
+        2: entity.other.attribute-name.xpx
+        3: punctuation.separator.key-value.html
+      push:
+        - match: '"'
+          scope: punctuation.definition.string.begin.xpx
+          set:
+            - meta_scope: meta.attribute-with-value.html string.quoted.double.html
+            - meta_content_scope: entity.other.attribute-value.xpx
+            - match: '"'
+              scope: punctuation.definition.string.end.xpx
+              pop: true
+            - match: '\$'
+              push: xpx-variable
+        - match: '(?:[^\s<>/''"]|/(?!>))+'
+          scope: meta.attribute-with-value.html string.unquoted.html
+        - match: ''
+          pop: true
+
+  # Définir une région (scope) spécifique à la propriété query pour utilisation particulière
+  # en thème.
+  xpx-attribute-query:
+    - match: '\s+\b((query)\b\s*(=)\s*)'
+      captures:
+        1: meta.attribute-with-value.html
+        2: entity.other.attribute-name.query.xpx
+        3: punctuation.separator.key-value.html
+      push:
+        - match: '"'
+          scope: punctuation.definition.string.begin.xpx
+          set:
+            - meta_scope: meta.attribute-with-value.html string.quoted.double.html
+            - meta_content_scope: entity.other.attribute-value.query.xpx
+            - match: '"'
+              scope: punctuation.definition.string.end.xpx
+              pop: true
+            - match: '\$'
+              push: xpx-variable
+        - match: '(?:[^\s<>/''"]|/(?!>))+'
+          scope: meta.attribute-with-value.html string.unquoted.html
+        - match: ''
+          pop: true
+
+  # Définir une région (scope) variable XPX et variable incluse.
+  xpx-variable:
+    - meta_scope: variable.other.readwrite.xpx
+    - match: '\b(phcdebug)\b'
+      scope: variable.other.readwrite.specific-xpx.xpx
+    - match: '\b(sqlrowcount)\b'
+      scope: variable.other.readwrite.specific-sql.xpx
+    - match: '\[[a-zA-Z0-9_]*\]'
+      scope: variable.other.readwrite.included.xpx
+    - match: '\$'
+      pop: true
+
