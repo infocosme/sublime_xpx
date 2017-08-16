@@ -1,0 +1,17 @@
+{
+	"schema_version": "3.0.0",
+	"packages": [
+		{
+			"name": "XPX",
+			"details": "https://github.com/infocosme/sublime_xpx",
+			"labels": ["auto-complete", "language syntax", "snippets"],
+			"releases": [
+				{
+					"platforms": ["windows", "osx", "linux"],
+					"sublime_text": ">=3000",
+					"tags": true
+				}
+			]
+		}
+	]
+}
