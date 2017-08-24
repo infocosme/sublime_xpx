@@ -11,5 +11,5 @@
     // source code, and otherwise enabled.
     "word_wrap": "false",
 	// The number of spaces a tab is considered equal to
-	"default_line_ending": "unix",
+	"default_line_ending": "unix"
 }
