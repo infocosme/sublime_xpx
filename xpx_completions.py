@@ -15,21 +15,6 @@ import re
 #    # ("table\tTag", "table>$1</table>"),
 #    return (tag + '\tTag', tag + '>$0</' + tag + '>')
 
-
-def plugin_loaded():
-    was_upgraded = False
-
-    try:
-        from package_control import events
-    except ImportError as error:
-        logging.log(NOPC_MSG)
-        logging.dump(error)
-    else:
-        was_upgraded = events.post_upgrade("XPX")
-    finally:
-        if was_upgraded:
-            sublime.message_dialog("Plugin XPX mis à jour.")
-
 def get_tag_to_attributes():
     """
     Returns a dictionary with attributes accociated to tags
