@@ -15,21 +15,12 @@ Un thème est proposé (surtout pour l'exemple d'utilisation des scopes de la sy
 Sincères salutations.
 P. Milon
 
-## Historique :
+## Scopes
 
-### v0.9.8 (23/08/2017) :
-* auto-completions : améliorations, corrections de bug.
-* auto-completions : ajout de la completion pour les valeurs d'attributs.
+## Auto-complétions
+### Comment compléter ?
 
-### v0.9.7 (23/08/2017) :
-* balise <noparse> : correction de bug.
+## Comment personnaliser le thème XPX proposé par défaut ?
 
-### v0.9.6 (22/08/2017) :
-* balise <noparse> sans analyse syntaxique XPX (maintien de l'analyse HTML, javascript, style, ...).
-* balise <function> : arguments (sous forme d'attributs) dorénavant reconnus et analysés comme attributs HTML.
-* thème proposé : couleur attribut XPX de même couleur que l'attribut HTML.
-
-### v0.9.5 (22/08/2017) :
-* caractères d'échappement des guillemets neutralisés dans une valeur d'attribut.
 
 
