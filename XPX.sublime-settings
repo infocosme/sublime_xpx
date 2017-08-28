@@ -1,15 +1,10 @@
 // These settings override both User and Default settings for the XPX syntax
 {
-	// "Packages/Color Scheme - Default/Monokai.tmTheme"
 	"color_scheme": "Packages/XPX/XPX.tmTheme",
-	// The number of spaces a tab is considered equal to
 	"tab_size": 3,
-	// Spacing between the gutter and the text
 	"margin": 3,
-    // Disables horizontal scrolling if enabled.
-    // May be set to true, false, or "auto", where it will be disabled for
-    // source code, and otherwise enabled.
     "word_wrap": "false",
-	// The number of spaces a tab is considered equal to
-	"default_line_ending": "unix"
+	"default_line_ending": "unix",
+    "auto_complete_cycle": false,
+    "xpx_inline_tags_list": "set"
 }

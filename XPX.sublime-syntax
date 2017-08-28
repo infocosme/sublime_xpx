@@ -88,7 +88,7 @@ contexts:
         1: punctuation.definition.tag.begin.html
         2: entity.name.tag.block.any.html entity.name.tag.xpx
       push:
-        - meta_scope: meta.tag.block.any.html
+        - meta_scope: meta.tag.block.any.xpx
         # Fin de balise sans /.
         - match: '>'
           scope: punctuation.definition.tag.end.html
@@ -105,7 +105,7 @@ contexts:
         1: punctuation.definition.tag.begin.html
         2: entity.name.tag.inline.any.html entity.name.tag.xpx
       push:
-        - meta_scope: meta.tag.inline.any.html
+        - meta_scope: meta.tag.inline.any.xpx
         # Fin de balise sans / ou bien avec /.
         - match: '(?: ?/)?>'
           scope: punctuation.definition.tag.end.html

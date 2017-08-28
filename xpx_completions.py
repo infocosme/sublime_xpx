@@ -3,17 +3,17 @@ import re
 
 # Deux fonctions déjà définies dans HTML : détruites.
 
-#def match(rex, str):
-#    m = rex.match(str)
-#    if m:
-#        return m.group(0)
-#    else:
-#        return None
+def match(rex, str):
+    m = rex.match(str)
+    if m:
+        return m.group(0)
+    else:
+        return None
 
-#def make_completion(tag):
-#    # make it look like
-#    # ("table\tTag", "table>$1</table>"),
-#    return (tag + '\tTag', tag + '>$0</' + tag + '>')
+def make_completion(tag):
+    # make it look like
+    # ("table\tTag", "table>$1</table>"),
+    return (tag + '\tTag', tag + '>$0</' + tag + '>')
 
 def get_tag_to_attributes():
     """
@@ -110,7 +110,6 @@ class XpxTagCompletions(sublime_plugin.EventListener):
     """
     def __init__(self):
         completion_list = self.default_completion_list()
-        
         self.prefix_completion_dict = {}
         # construct a dictionary where the key is first character of
         # the completion list to the completion
@@ -170,7 +169,8 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         # 23/08/2017 : Permettre la complétion des balises XPX à partir de rien (CTRL+Espace)
         # Définir la liste sur la liste complète des tags XPX : l'utilisateur ne se rappelle pas du nom de la balise.
         if prefix == '' and ch != '<':
-            completion_list = self.default_xpx_tags_list()
+            # completion_list = self.default_xpx_tags_list()
+            completion_list = []
             # return (completion_list, sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
             return (completion_list, sublime.INHIBIT_WORD_COMPLETIONS)
         if prefix == '' and ch == '<':
@@ -183,6 +183,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         completion_list = self.prefix_completion_dict.get(prefix[0], [])
 
         # if the opening < is not here insert that
+        # Cas d'une demande d'auto-complétion sans saisie préalable du < (Ctrl+Espace).
         if ch != '<':
             completion_list = [(pair[0], '<' + pair[1]) for pair in completion_list]
 
@@ -198,7 +199,10 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         Generate a default completion list for XPX Tags
         Aide à la recherche du nom de la balise.
         """
+
         default_list = []
+        # Liste des tags XPX normaux : de type block ?
+        # 'cond', 'function', 'noparse', 'scope', 'setarea', 'sql', 'while'
         normal_tags = ([
         ])
 
@@ -210,27 +214,27 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         # L'expand de balise s'effectue sur le premier snippet ne contenant que 2 arguements.
         # set name value sera ignoré vs set namevalue qui sera accepté.
         default_list += ([
-            ('cond\tXPX', '<cond $1></cond>\n$0'),
-            ('connect\tXPX', '<connect $1 />\n$0'),
-            ('cookie\tXPX', '<cookie name=\"$1\" />$0'),
-            ('create\tXPX', '<create dir=\"$1\" />$0'),
-            ('debug\tXPX', '<debug />$0'),
-            ('else\tXPX', '<else />$0'),
-            ('file\tXPX', '<file />$0'),
+            ('cond\tXPX', '<cond $1>$0</cond>\n'),
+            ('connect\tXPX', '<connect $1>\n'),
+            ('cookie\tXPX', '<cookie name=\"$1\">'),
+            ('create\tXPX', '<create dir=\"$1\">'),
+            ('debug\tXPX', '<debug>'),
+            ('else\tXPX', '<else>'),
+            ('file\tXPX', '<file>'),
             ('function\tXPX', '<function name=\"$1\">$0</function>'),
-            ('get\tXPX', '<get value=\"$1\" />$0'),
-            ('http\tXPX', '<http name=\"$1\" get=\"$2\" timeout=\"$3\" />$0'),
-            ('include\tXPX', '<include file=\"$1\" />$0'),
-            ('mail\tXPX', '<mail smtp=\"$1\"\n\t\tfrom=\"$2\"\n\t\tto=\"$3\"\n\t\tsubject=\"$4\"\n\t\ttype=\"$5\" />$0'),
+            ('get\tXPX', '<get value=\"$1\">'),
+            ('http\tXPX', '<http name=\"$1\" get=\"$2\" timeout=\"$3\">'),
+            ('include\tXPX', '<include file=\"$1\">'),
+            ('mail\tXPX', '<mail smtp=\"$1\"\n\t\tfrom=\"$2\"\n\t\tto=\"$3\"\n\t\tsubject=\"$4\"\n\t\ttype=\"$5\">'),
             ('noparse\tXPX', '<noparse>$0</noparse>'),
-            ('pdf\tXPX', '<pdf />$0'),
-            ('pict\tXPX', '<pict name=\"$1\" dest=\"$2\" />$0'),
+            ('pdf\tXPX', '<pdf>'),
+            ('pict\tXPX', '<pict name=\"$1\" dest=\"$2\">'),
             ('scope\tXPX', '<scope>$0</scope>'),
-            ('set\tXPX', '<set />$0'),
+            ('set\tXPX', '<set>'),
             ('setarea\tXPX', '<setarea name=\"$1\">$0</setarea>'),
-            ('sql\tXPX', '<sql query=\"$0\"></sql>'),
+            ('sql\tXPX', '<sql query=\"$1\">$0</sql>'),
             ('while\tXPX', '<while expr=\"$1\">$0</while>'),
-            ('xproc\tXPX', '<xproc />$0')
+            ('xproc\tXPX', '<xproc>')
         ])
 
         return default_list
@@ -252,32 +256,32 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         # "set name value" sera ignoré vs "set namevalue" qui sera accepté.
         default_list += ([
             ('cond\tXPX', 'cond expr=\"$1\">\n\t$2\n</cond>\n$0'),
-            ('cond else\tXPX', 'cond expr=\"$1\">\n\t$2\n<else />\n\t$3\n</cond>\n$0'),
-            ('cond else expr\tXPX', 'cond expr=\"$1\">\n\t$2\n<else expr=\"$3\" />\n\t$4\n<else />\n\t$5\n</cond>\n$0'),
-            ('connect\tXPX', 'connect server=\"$1\" base=\"$2\" name=\"$3\" pass=\"$4\" />$0'),
-            ('cookie name\tXPX', 'cookie name=\"$1\" />$0'),
-            ('create dir\tXPX', 'create dir=\"$1\" />$0'),
-            ('debug\tXPX', 'debug />$0'),
-            ('else\tXPX', 'else />$0'),
-            ('else expr\tXPX', 'else expr=\"$1\" />$0'),
-            ('file\tXPX', 'file />$0'),
+            ('cond else\tXPX', 'cond expr=\"$1\">\n\t$2\n<else>\n\t$3\n</cond>\n$0'),
+            ('cond else expr\tXPX', 'cond expr=\"$1\">\n\t$2\n<else expr=\"$3\">\n\t$4\n<else>\n\t$5\n</cond>\n$0'),
+            ('connect\tXPX', 'connect server=\"$1\" base=\"$2\" name=\"$3\" pass=\"$4\">'),
+            ('cookie name\tXPX', 'cookie name=\"$1\">'),
+            ('create dir\tXPX', 'create dir=\"$1\">'),
+            ('debug\tXPX', 'debug>'),
+            ('else\tXPX', 'else>'),
+            ('else expr\tXPX', 'else expr=\"$1\">'),
+            ('file\tXPX', 'file>'),
             ('function name\tXPX', 'function name=\"$1\">$0</function>'),
-            ('get value\tXPX', 'get value=\"$1\" />$0'),
-            ('http\tXPX', 'http name=\"$1\" get=\"$2\" timeout=\"$3\" />$0'),
-            ('include file\tXPX', 'include file=\"$1\" />$0'),
-            ('mail\tXPX', 'mail smtp=\"$1\"\n\t\tfrom=\"$2\"\n\t\tto=\"$3\"\n\t\tsubject=\"$4\"\n\t\ttype=\"$5\" />$0'),
+            ('get value\tXPX', 'get value=\"$1\">'),
+            ('http\tXPX', 'http name=\"$1\" get=\"$2\" timeout=\"$3\">'),
+            ('include file\tXPX', 'include file=\"$1\">'),
+            ('mail\tXPX', 'mail smtp=\"$1\"\n\t\tfrom=\"$2\"\n\t\tto=\"$3\"\n\t\tsubject=\"$4\"\n\t\ttype=\"$5\">'),
             ('noparse\tXPX', 'noparse>$0</noparse>'),
-            ('pdf\tXPX', 'pdf />$0'),
-            ('pict name\tXPX', 'pict name=\"$1\" dest=\"$2\" />$0'),
+            ('pdf\tXPX', 'pdf>'),
+            ('pict name\tXPX', 'pict name=\"$1\" dest=\"$2\">'),
             ('scope\tXPX', 'scope>$0</scope>'),
-            ('set namevalue\tXPX', 'set name=\"$1\" value=\"$2\" />$0'),
-            ('set nameexpr\tXPX', 'set name=\"$1\" expr=\"$2\" />$0'),
-            ('set datetime\tXPX', 'set datetime=\"$1\" format=\"$2\" />$0'),
-            ('set global\tXPX', 'set global=\"$1\" />$0'),
+            ('set namevalue\tXPX', 'set name=\"$1\" value=\"$2\">'),
+            ('set nameexpr\tXPX', 'set name=\"$1\" expr=\"$2\">'),
+            ('set datetime\tXPX', 'set datetime=\"$1\" format=\"$2\">'),
+            ('set global\tXPX', 'set global=\"$1\">'),
             ('setarea name\tXPX', 'setarea name=\"$1\">$0</setarea>'),
-            ('sql query\tXPX', 'sql query=\"$0\"></sql>'),
+            ('sql query\tXPX', 'sql query=\"$1\">$0</sql>'),
             ('while expr\tXPX', 'while expr=\"$1\">$0</while>'),
-            ('xproc\tXPX', 'xproc />$0')
+            ('xproc\tXPX', 'xproc>')
         ])
 
         return default_list
@@ -349,6 +353,6 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         # got the attribute name, now find all properties values that match
         values = self.attribute_to_values.get(myAttributeName, [])
         # ("class\tAttr", "class"),
-        attri_completions = [(value + '\tXPX value', value) for value in values]
-        return attri_completions
+        values_completions = [(value + '\tXPX value', value) for value in values]
+        return values_completions
 

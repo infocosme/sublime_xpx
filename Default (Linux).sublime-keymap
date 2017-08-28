@@ -1,0 +1,8 @@
+[
+    { "keys": ["/"], "command": "xpx_close_tag", "context":
+    	[
+            { "key": "selector", "operator": "equal", "operand": "text.html.xpx", "match_all": true},
+            { "key": "preceding_text", "operator": "regex_contains", "operand": "<$"}
+   		]
+    }
+]
