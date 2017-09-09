@@ -25,7 +25,7 @@ class XpxCloseTagCommand(sublime_plugin.TextCommand):
 
         # Définition de la liste des tags block HTML :
         myHTMLBlockTagsList = ([
-            'abbr', 'acronym', 'address', 'applet', 'article', 'aside',
+            'a', 'abbr', 'acronym', 'address', 'applet', 'article', 'aside',
             'audio', 'b', 'basefont', 'bdi', 'bdo', 'big', 'blockquote',
             'body', 'button', 'center', 'canvas', 'caption', 'cdata',
             'cite', 'colgroup', 'code', 'content', 'data', 'datalist',
@@ -44,7 +44,7 @@ class XpxCloseTagCommand(sublime_plugin.TextCommand):
         ])
         # Définition de la liste des tags inline HTML :
         myHTMLInlineTagsList = ([
-            'a', 'area', 'audio', 'base', 'br', 'col', 'hr', 'input', 'img', 'link',
+            'area', 'audio', 'base', 'br', 'col', 'hr', 'input', 'img', 'link',
             'meta', 'param', 'progress', 'source', 'style', 'track', 'wbr'
         ])
 
