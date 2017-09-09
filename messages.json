@@ -1,5 +1,9 @@
 {
     "install": "messages/install.md",
+    "v1.0.3" : "messages/v1.0.3.md",
+    "v1.0.2" : "messages/v1.0.2.md",
+    "v1.0.1" : "messages/v1.0.1.md",
+    "v1.0.0" : "messages/v1.0.0.md",
     "v0.9.10": "messages/v0.9.10.md",
     "v0.9.9" : "messages/v0.9.9.md",
     "v0.9.8" : "messages/v0.9.8.md",
