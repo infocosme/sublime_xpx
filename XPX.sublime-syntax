@@ -100,7 +100,7 @@ contexts:
 
   # Définir une région (scope) balise simple (inline) XPX par mot-clé.
   xpx-tag-inline:
-    - match: '(</?)((?i:cookie|connect|create|else|file|get|http|include|mail|pdf|pict|set|system)\b)'
+    - match: '(</?)((?i:cookie|connect|create|else|file|get|http|include|mail|pdf|pict|set|system|wait|xproc)\b)'
       captures:
         1: punctuation.definition.tag.begin.html
         2: entity.name.tag.inline.any.html entity.name.tag.xpx
@@ -115,7 +115,7 @@ contexts:
   # Définir une région (scope) d'une propriété de balise XPX par mot-clé.
   xpx-attribute:
     # (?i) case insensitive
-    - match: '\s+\b((?i)(align|addpage|base|bgcolor|bit|bitoff|biton|border|by|cc|cci|charset|close|color|content|datetime|decode64|delete|dest|dir|domain|encode64|eol|exec|exist|expr|file|font|format|frame|from|get|geth|getw|getx|gety|gettext|global|href|info|join|keycode|lang|leading|len|line|local|lowcase|ltrim|maxrows|mode|model|money|msg|name|noaccent|open|option|padding|pass|path|port|rand|read|rect|replace|reply|return|rotate|round|rtrim|server|size|smtp|socket|start|strcode|strdecode|strescape|style|subject|text|timeout|trim|ttl|to|token|type|upcase|urlcode|value|write|xmlcode|xpx)\b\s*(=)\s*)'
+    - match: '\s+\b((?i)(align|addpage|base|bgcolor|bit|bitoff|biton|border|by|cc|cci|charset|close|color|content|datetime|decode64|delete|dest|dir|domain|encode64|eol|exec|exist|expr|file|font|format|frame|from|get|geth|getw|getx|gety|gettext|global|href|info|join|keycode|lang|leading|len|line|local|lowcase|ltrim|maxrows|mode|model|money|msg|name|noaccent|open|option|padding|pass|path|port|rand|read|rect|replace|reply|return|rotate|round|rtrim|select|server|size|smtp|socket|start|strcode|strdecode|strescape|style|subject|text|timeout|trim|ttl|to|token|type|upcase|urlcode|value|write|xmlcode|xpx)\b\s*(=)\s*)'
       captures:
         1: meta.attribute-with-value.html
         2: entity.other.attribute-name.xpx

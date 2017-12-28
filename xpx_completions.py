@@ -44,6 +44,7 @@ def get_tag_to_attributes():
         'set' : ['bit', 'bitoff', 'biton', 'by', 'charset', 'datetime', 'decode64', 'encode64', 'expr', 'format', 'global', 'keycode', 'lang', 'len', 'local', 'lowcase', 'ltrim', 'money', 'name', 'noaccent', 'rand', 'replace', 'return', 'rtrim', 'strcode', 'strdecode', 'strescape', 'trim', 'upcase', 'urlcode', 'value', 'xmlcode'],
         'setarea' : ['name', 'option'],
         'sql' : ['connect', 'maxrows', 'option', 'query', 'start'],
+        'wait' : ['value'],
         'while' : ['expr'],
         'xproc' : ['file', 'select', 'value']
     }
@@ -233,6 +234,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('set\tXPX', '<set>'),
             ('setarea\tXPX', '<setarea name=\"$1\">$0</setarea>'),
             ('sql\tXPX', '<sql query=\"$1\">$0</sql>'),
+            ('wait\tXPX', '<wait value=\"$1\">'),
             ('while\tXPX', '<while expr=\"$1\">$0</while>'),
             ('xproc\tXPX', '<xproc>')
         ])
@@ -280,6 +282,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('set global\tXPX', 'set global=\"$1\">'),
             ('setarea name\tXPX', 'setarea name=\"$1\">$0</setarea>'),
             ('sql query\tXPX', 'sql query=\"$1\">$0</sql>'),
+            ('wait value\tXPX', 'wait value=\"$1\">'),
             ('while expr\tXPX', 'while expr=\"$1\">$0</while>'),
             ('xproc\tXPX', 'xproc>')
         ])
