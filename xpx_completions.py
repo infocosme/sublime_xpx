@@ -41,7 +41,7 @@ def get_tag_to_attributes():
         'pdf' : ['addpage', 'align', 'bgcolor', 'border', 'close', 'color', 'file', 'font', 'frame', 'gettext', 'getx', 'gety', 'href', 'leading', 'line', 'mode', 'name', 'padding', 'path', 'rect', 'rotate', 'round', 'size', 'style', 'text'],
         'pict' : ['border', 'calc', 'close', 'color', 'content', 'copy', 'dest', 'fill', 'font', 'geth', 'getw', 'height', 'name', 'path', 'position', 'rect', 'rotate', 'size', 'text', 'transparency', 'width', 'x', 'y'],
         'scope' : ['name'],
-        'set' : ['bit', 'bitoff', 'biton', 'by', 'charset', 'datetime', 'decode64', 'encode64', 'expr', 'format', 'global', 'keycode', 'lang', 'len', 'local', 'lowcase', 'ltrim', 'money', 'name', 'noaccent', 'rand', 'replace', 'return', 'rtrim', 'strcode', 'strdecode', 'strescape', 'trim', 'upcase', 'urlcode', 'value', 'xmlcode'],
+        'set' : ['bit', 'bitoff', 'biton', 'by', 'charset', 'datetime', 'decode64', 'encode64', 'expr', 'format', 'global', 'hash', 'hex2bin', 'hexatochar', 'hmac', 'keycode', 'lang', 'len', 'local', 'lowcase', 'ltrim', 'money', 'name', 'noaccent', 'rand', 'replace', 'return', 'rtrim', 'strcode', 'strdecode', 'strescape', 'trim', 'upcase', 'urlcode', 'value', 'xmlcode'],
         'setarea' : ['name', 'option'],
         'sql' : ['connect', 'maxrows', 'option', 'query', 'start'],
         'wait' : ['value'],
@@ -71,10 +71,14 @@ def get_attribute_to_values():
     # Cette liste est utilisée pour la suggestion des propriétés en fonction de l'attribut.
     attribute_dict = {
         # <pdf>
-        'align' : [ 'center', 'left', 'right'],
+        'align' : ['center', 'left', 'right'],
+        # <mail>
+        'charset' : ['iso-8859-1', 'utf-8'],
+        # <pdf>
         'font' : ['Courier', 'Helvetica', 'Times', 'Symbol', 'ZapfDingbats'],
         # <set>
-        'format' : ['yyyy-mm-dd', 'yymmddhhmnss'],
+        'format' : ['yyyy-mm-dd', 'yymmddhhmnss', 'tt'],
+        'hash' : ['md5', 'sha1', 'sha256'],
         # <debug> <file> <pdf>
         'mode' : ['<debug mode:', 'auto', 'normal', 'off', '<file mode:', 'append', 'read', 'write', '<pdf mode:', 'clip', 'noclip', 'pagebreak'],
         # <include> <sql>
@@ -212,7 +216,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             default_list.append(make_completion(tag.upper()))
 
         # Cette liste est utilisée pour remplir la suggestion de balise à la frappe.
-        # L'expand de balise s'effectue sur le premier snippet ne contenant que 2 arguements.
+        # L'expand de balise s'effectue sur le premier snippet ne contenant que 2 arguments.
         # set name value sera ignoré vs set namevalue qui sera accepté.
         default_list += ([
             ('cond\tXPX', '<cond $1>$0</cond>\n'),
@@ -268,7 +272,8 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('else expr\tXPX', 'else expr=\"$1\">'),
             ('file\tXPX', 'file>'),
             ('function name\tXPX', 'function name=\"$1\">$0</function>'),
-            ('get value\tXPX', 'get value=\"$1\">'),
+            ('get valueformat\tXPX', 'get value=\"$1\" format=\"$2\">'),
+            ('get valuetoken\tXPX', 'get value=\"$1\" token=\"$2\" name=\"$3\">'),
             ('http\tXPX', 'http name=\"$1\" get=\"$2\" timeout=\"$3\">'),
             ('include file\tXPX', 'include file=\"$1\">'),
             ('mail\tXPX', 'mail smtp=\"$1\"\n\t\tfrom=\"$2\"\n\t\tto=\"$3\"\n\t\tsubject=\"$4\"\n\t\ttype=\"$5\">'),
@@ -278,6 +283,8 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('scope\tXPX', 'scope>$0</scope>'),
             ('set namevalue\tXPX', 'set name=\"$1\" value=\"$2\">'),
             ('set nameexpr\tXPX', 'set name=\"$1\" expr=\"$2\">'),
+            ('set nameencode64\tXPX', 'set name=\"$1\" encode64=\"$2\">'),
+            ('set namehash\tXPX', 'set name=\"$1\" value=\"$2\" hash=\"$3\" hmac=\"$4\">'),
             ('set datetime\tXPX', 'set datetime=\"$1\" format=\"$2\">'),
             ('set global\tXPX', 'set global=\"$1\">'),
             ('setarea name\tXPX', 'setarea name=\"$1\">$0</setarea>'),
