@@ -34,7 +34,7 @@ def get_tag_to_attributes():
         'file' : ['close', 'content', 'delete', 'eol', 'exist', 'name', 'mode', 'model', 'open', 'path', 'read', 'write', 'xpx'],
         'function' : ['name', 'exec'],
         'get' : ['format', 'name', 'option', 'token', 'value'],
-        'http' : ['content', 'get', 'name', 'port', 'timeout'],
+        'http' : ['content', 'get', 'headers', 'name', 'port', 'timeout'],
         'include' : ['file', 'option'],
         'mail' : ['cc', 'cci', 'charset', 'file', 'from', 'join', 'msg', 'reply', 'smtp', 'subject', 'to', 'type'],
         'noparse' : [],
@@ -46,6 +46,7 @@ def get_tag_to_attributes():
         'sql' : ['connect', 'maxrows', 'option', 'query', 'start'],
         'wait' : ['value'],
         'while' : ['expr'],
+        'xpath' : ['file', 'select', 'value'],
         'xproc' : ['file', 'select', 'value']
     }
 
@@ -228,7 +229,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('file\tXPX', '<file>'),
             ('function\tXPX', '<function name=\"$1\">$0</function>'),
             ('get\tXPX', '<get value=\"$1\">'),
-            ('http\tXPX', '<http name=\"$1\" get=\"$2\" timeout=\"$3\">'),
+            ('http\tXPX', '<http name=\"$1\" get=\"$2\" timeout=\"$3\" content=\"$4\">'),
             ('include\tXPX', '<include file=\"$1\">'),
             ('mail\tXPX', '<mail smtp=\"$1\"\n\t\tfrom=\"$2\"\n\t\tto=\"$3\"\n\t\tsubject=\"$4\"\n\t\ttype=\"$5\">'),
             ('noparse\tXPX', '<noparse>$0</noparse>'),
@@ -240,6 +241,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('sql\tXPX', '<sql query=\"$1\">$0</sql>'),
             ('wait\tXPX', '<wait value=\"$1\">'),
             ('while\tXPX', '<while expr=\"$1\">$0</while>'),
+            ('xpath\tXPX', '<xpath>'),
             ('xproc\tXPX', '<xproc>')
         ])
 
@@ -274,7 +276,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('function name\tXPX', 'function name=\"$1\">$0</function>'),
             ('get valueformat\tXPX', 'get value=\"$1\" format=\"$2\">'),
             ('get valuetoken\tXPX', 'get value=\"$1\" token=\"$2\" name=\"$3\">'),
-            ('http\tXPX', 'http name=\"$1\" get=\"$2\" timeout=\"$3\">'),
+            ('http\tXPX', 'http name=\"$1\" get=\"$2\" timeout=\"$3\" content=\"$4\">'),
             ('include file\tXPX', 'include file=\"$1\">'),
             ('mail\tXPX', 'mail smtp=\"$1\"\n\t\tfrom=\"$2\"\n\t\tto=\"$3\"\n\t\tsubject=\"$4\"\n\t\ttype=\"$5\">'),
             ('noparse\tXPX', 'noparse>$0</noparse>'),
@@ -287,11 +289,14 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('set namehash\tXPX', 'set name=\"$1\" value=\"$2\" hash=\"$3\" hmac=\"$4\">'),
             ('set datetime\tXPX', 'set datetime=\"$1\" format=\"$2\">'),
             ('set global\tXPX', 'set global=\"$1\">'),
+            ('set namedebug1\tXPX', 'set name=\"phcdebug\" value=\"1\">'),
+            ('set namedebug0\tXPX', 'set name=\"phcdebug\" value=\"0\">'),
             ('setarea name\tXPX', 'setarea name=\"$1\">$0</setarea>'),
             ('sql query\tXPX', 'sql query=\"$1\">$0</sql>'),
             ('wait value\tXPX', 'wait value=\"$1\">'),
             ('while expr\tXPX', 'while expr=\"$1\">$0</while>'),
-            ('xproc\tXPX', 'xproc>')
+            ('xpath\tXPX', 'xpath>$0</xpath>'),
+            ('xproc\tXPX', 'xproc>$0</xproc>')
         ])
 
         return default_list
