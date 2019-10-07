@@ -55,25 +55,52 @@ class XpxCloseTagCommand(sublime_plugin.TextCommand):
         # <script, </script, <div, <cond, </cond, ...
         # Ne pas tenir compte des tags dont le scope est défini sur inline.
         myTagsList = []
-        myPt = 0
+        myNextPt = 0
         # Recherche de la prochaine balise (ouverture: '<balise' ou fermeture: '</balise')
-        myRegion=self.view.find('(<)(\/?)(\w+)', myPt, sublime.IGNORECASE)
+        myRegion=self.view.find('(<)(\/?)(\w+)', myNextPt, sublime.IGNORECASE)
+        # myDebug=self.view.substr(myRegion)
+        # print('myRegion:',myRegion,myDebug)
         while myRegion.end() > 0 and myRegion.end() < cursorPosition:
             # Récupérer le nom de la balise à traiter (sans fioritures)
             myTag = self.view.substr(myRegion)
-            # tag de fermeture
+            # print('myTag lu:',myTag)
+            # cas du tag de fermeture
             if '/' in myTag:
                 myTagName = myTag[2:]
             else:
                 myTagName = myTag[1:]
+            # Lecture du scope complet afin de déterminer la présence de la fermeture de tag inline
+            # dans un tag block (on ne sait jamais...) et cas du tag function du XPX (double emploi)
+            bonPourLifo = True
+            myPtAfter = myRegion.end()
+            # le scope du tag script est le scope global : donc ne pas traiter sinon arrêt de la boucle
+            if 'script' not in myTagName:
+                # Lecture de la région complète du scope en cours.
+                myScopeRegion=self.view.extract_scope(myRegion.end())
+                # Lecture du contenu de la région.
+                myScopeText=self.view.substr(myScopeRegion)
+                # print('myTag:',myTag,'myDebug:',myScopeText)
+                # Ne pas tenir compte du tag lu précédemment si il se termine en inline.
+                if '/>' in myScopeText:
+                    bonPourLifo = False
+                    # La lecture du script doit se poursuivre après le faux inline.
+                    myPtAfter = myScopeRegion.end()
             # Si le scope contient 'meta.tag.inline.any.xpx', le tag ne sera pas ajouté à la pile LIFO.
             # Si le tag n'est pas présent dans la liste des inline tags HTML, il sera ajouté.
-            if not 'meta.tag.inline.any.xpx' in self.view.scope_name(myRegion.end()) and myTagName not in myHTMLInlineTagsList:
+            # 07/10/2019 : Ne pas faire de traitement si dans scope valeur de propriété.
+            if bonPourLifo \
+            and not 'meta.tag.inline.any.xpx' in self.view.scope_name(myRegion.end()) \
+            and not 'string.quoted.double.html' in self.view.scope_name(myRegion.end()) \
+            and myTagName not in myHTMLInlineTagsList:
                 # Préserver le début de la balise pour déterminer si balise ouverture ou fermeture.
                 myTagsList.append((myTag, self.view.scope_name(myRegion.end())))
-            myPt = myRegion.end()
+                # print('myTag stocké',myTag)
+            # myPt = myRegion.end()
+            myNextPt = myPtAfter
             # Recherche de la prochaine balise (ouverture: '<balise' ou fermeture: '</balise')
-            myRegion=self.view.find('(<)(\/?)(\w+)', myPt, sublime.IGNORECASE)
+            myRegion=self.view.find('(<)(\/?)(\w+)', myNextPt, sublime.IGNORECASE)
+            # myDebug=self.view.substr(myRegion)
+            # print('myRegion:',myRegion,myDebug)
         # print('myTagsList:', myTagsList)
 
         # Analyse de la liste en mode LIFO afin de sortir le dernier tag non refermé.

@@ -16,6 +16,7 @@ contexts:
         - include: xpx-tag-block-noparse
         - include: xpx-javascript
         - include: xpx-tag-block
+        - include: xpx-tag-block-function
         - include: xpx-tag-inline
         # Permettre la reconnaissance des variables dans le HTML.
         - match: '\$'
@@ -83,7 +84,7 @@ contexts:
 
   # Définir une région (scope) balise double (block) XPX par mot-clé.
   xpx-tag-block:
-    - match: '(</?)((?i:cond|debug|function|scope|sql|while|xpath|xproc)\b)'
+    - match: '(</?)((?i:cond|debug|scope|sql|while|xpath|xproc)\b)'
       captures:
         1: punctuation.definition.tag.begin.html
         2: entity.name.tag.block.any.html entity.name.tag.xpx
@@ -95,6 +96,20 @@ contexts:
           pop: true
         - include: xpx-attribute
         - include: xpx-attribute-query
+
+  # Définir une région (scope) balise double (block) XPX par mot-clé.
+  xpx-tag-block-function:
+    - match: '(</?)((?i:function)\b)'
+      captures:
+        1: punctuation.definition.tag.begin.html
+        2: entity.name.tag.block.any.html entity.name.tag.xpx
+      push:
+        - meta_scope: meta.tag.block.any.xpx
+        # Fin de balise sans /.
+        - match: '>'
+          scope: punctuation.definition.tag.end.html
+          pop: true
+        - include: xpx-attribute-function
         # Permet l'analyse syntaxique des attributs non déterminés de la balise XPX/function (arguments).
         - include: 'scope:text.html.basic#tag-stuff'
 
@@ -115,7 +130,32 @@ contexts:
   # Définir une région (scope) d'une propriété de balise XPX par mot-clé.
   xpx-attribute:
     # (?i) case insensitive
-    - match: '\s+\b((?i)(align|addpage|base|bgcolor|bit|bitoff|biton|border|by|cc|cci|charset|close|color|content|datetime|decode64|delete|dest|dir|domain|encode64|eol|exec|exist|expr|file|font|format|frame|from|get|geth|getw|getx|gety|gettext|global|hash|headers|hex2bin|hexatochar|hmac|href|info|join|keycode|lang|leading|len|line|local|lowcase|ltrim|maxrows|mode|model|money|msg|name|noaccent|open|option|padding|pass|path|port|rand|read|rect|replace|reply|return|rotate|round|rtrim|select|server|size|smtp|socket|start|strcode|strdecode|strescape|style|subject|text|timeout|trim|ttl|to|token|type|upcase|urlcode|value|write|xmlcode|xpx)\b\s*(=)\s*)'
+    - match: '\s+\b((?i)(align|addpage|base|bgcolor|bit|bitoff|biton|border|by|calc|cc|cci|charset|close|color|content|datetime|decode64|delete|dest|dir|domain|encode64|eol|exec|exist|expr|file|font|format|frame|from|get|geth|getw|getx|gety|gettext|global|hash|headers|hex2bin|hexatochar|hmac|href|html2text|info|join|keycode|lang|leading|len|line|local|lowcase|ltrim|maxrows|mode|model|money|msg|name|noaccent|open|option|padding|pass|path|port|rand|read|rect|replace|reply|return|rotate|round|rtrim|select|server|size|smtp|socket|start|strcode|strdecode|strescape|style|subject|svg2pdf|text|timeout|transaction|trim|ttl|to|token|type|upcase|urlcode|value|write|xmlcode|xpx)\b\s*(=)\s*)'
+      captures:
+        1: meta.attribute-with-value.html
+        2: entity.other.attribute-name.xpx
+        3: punctuation.separator.key-value.html
+      push:
+        - match: '"'
+          scope: punctuation.definition.string.begin.xpx
+          set:
+            # Eliminer tous les guillements échappés.
+            - match: '\\"'
+            - meta_scope: meta.attribute-with-value.html string.quoted.double.html
+            - meta_content_scope: entity.other.attribute-value.xpx
+            - match: '"'
+              scope: punctuation.definition.string.end.xpx
+              pop: true
+            - match: '\$'
+              push: xpx-variable
+        - match: ''
+          pop: true
+
+  # Définir une région (scope) d'une propriété de balise XPX par mot-clé.
+  # Région des arguments function différent des propriétés définies.
+  xpx-attribute-function:
+    # Pour la balise function : n'importe quel nom de propriété.
+    - match: '\s+\b(([a-zA-Z0-9_]*)\b\s*(=)\s*)'
       captures:
         1: meta.attribute-with-value.html
         2: entity.other.attribute-name.xpx

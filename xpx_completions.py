@@ -26,7 +26,7 @@ def get_tag_to_attributes():
     # Cette liste est utilisée pour la suggestion des attributs en fonction de la balise.
     tag_dict = {
         'cond' : ['expr'],
-        'connect' : ['base', 'close', 'id', 'info', 'name', 'pass', 'port', 'server', 'socket'],
+        'connect' : ['base', 'close', 'id', 'info', 'name', 'pass', 'port', 'server', 'socket', 'transaction'],
         'cookie' : ['dir', 'domain', 'name', 'ttl', 'value'],
         'create' : ['dir'],
         'debug' : ['mode', 'printparam', 'suffix'],
@@ -38,10 +38,10 @@ def get_tag_to_attributes():
         'include' : ['file', 'option'],
         'mail' : ['cc', 'cci', 'charset', 'file', 'from', 'join', 'msg', 'reply', 'smtp', 'subject', 'to', 'type'],
         'noparse' : [],
-        'pdf' : ['addpage', 'align', 'bgcolor', 'border', 'close', 'color', 'file', 'font', 'frame', 'gettext', 'getx', 'gety', 'href', 'leading', 'line', 'mode', 'name', 'padding', 'path', 'rect', 'rotate', 'round', 'size', 'style', 'text'],
+        'pdf' : ['addpage', 'align', 'bgcolor', 'border', 'calc', 'close', 'color', 'file', 'font', 'frame', 'gettext', 'getx', 'gety', 'href', 'leading', 'line', 'mode', 'name', 'padding', 'path', 'rect', 'rotate', 'round', 'size', 'style', 'text'],
         'pict' : ['border', 'calc', 'close', 'color', 'content', 'copy', 'dest', 'fill', 'font', 'geth', 'getw', 'height', 'name', 'path', 'position', 'rect', 'rotate', 'size', 'text', 'transparency', 'width', 'x', 'y'],
         'scope' : ['name'],
-        'set' : ['bit', 'bitoff', 'biton', 'by', 'charset', 'datetime', 'decode64', 'encode64', 'expr', 'format', 'global', 'hash', 'hex2bin', 'hexatochar', 'hmac', 'keycode', 'lang', 'len', 'local', 'lowcase', 'ltrim', 'money', 'name', 'noaccent', 'rand', 'replace', 'return', 'rtrim', 'strcode', 'strdecode', 'strescape', 'trim', 'upcase', 'urlcode', 'value', 'xmlcode'],
+        'set' : ['bit', 'bitoff', 'biton', 'by', 'charset', 'datetime', 'decode64', 'encode64', 'expr', 'format', 'global', 'hash', 'hex2bin', 'hexatochar', 'hmac', 'html2text', 'keycode', 'lang', 'len', 'local', 'lowcase', 'ltrim', 'money', 'name', 'noaccent', 'rand', 'replace', 'return', 'rtrim', 'strcode', 'strdecode', 'strescape', 'svg2pdf', 'trim', 'upcase', 'urlcode', 'value', 'xmlcode'],
         'setarea' : ['name', 'option'],
         'sql' : ['connect', 'maxrows', 'option', 'query', 'start'],
         'wait' : ['value'],
@@ -93,7 +93,9 @@ def get_attribute_to_values():
         # <pdf>
         'style' : ['b', 'i', 'n', 'u'],
         # <http>
-        'timeout' : ['60']
+        'timeout' : ['60'],
+        # <connect>
+        'transaction' : ['normal', 'rollback']
     }
 
     # Assume that global attributes are common to all HTML elements
@@ -263,9 +265,9 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         # L'expand de balise s'effectue sur le premier snippet ne contenant que 2 arguements.
         # "set name value" sera ignoré vs "set namevalue" qui sera accepté.
         default_list += ([
-            ('cond\tXPX', 'cond expr=\"$1\">\n\t$2\n</cond>\n$0'),
-            ('cond else\tXPX', 'cond expr=\"$1\">\n\t$2\n<else>\n\t$3\n</cond>\n$0'),
-            ('cond else expr\tXPX', 'cond expr=\"$1\">\n\t$2\n<else expr=\"$3\">\n\t$4\n<else>\n\t$5\n</cond>\n$0'),
+            ('cond\tXPX', 'cond expr=\"$1\">\n\t$2\n</cond>$0'),
+            ('cond else\tXPX', 'cond expr=\"$1\">\n\t$2\n<else>\n\t$3\n</cond>$0'),
+            ('cond else expr\tXPX', 'cond expr=\"$1\">\n\t$2\n<else expr=\"$3\">\n\t$4\n<else>\n\t$5\n</cond>$0'),
             ('connect\tXPX', 'connect server=\"$1\" base=\"$2\" name=\"$3\" pass=\"$4\">'),
             ('cookie name\tXPX', 'cookie name=\"$1\">'),
             ('create dir\tXPX', 'create dir=\"$1\">'),
