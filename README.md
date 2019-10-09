@@ -18,7 +18,7 @@ P. Milon
 
 ## Installation
 Utiliser le plug-in "Package Control" pour installer le plug-in XPX.
-Dans la rubrique "install Package", chercher le plg-in nommé "XPX".
+Dans la rubrique "install Package", chercher le plug-in nommé "XPX".
 ## Personnalisation
 ### Thème par défaut
 Le thème XPX livré par défaut est une copie du thème Monokai personnalisé avec les régions du XPX sublime-syntax.
