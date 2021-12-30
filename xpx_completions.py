@@ -27,7 +27,7 @@ def get_tag_to_attributes():
     tag_dict = {
         'cond' : ['expr'],
         'connect' : ['base', 'close', 'id', 'info', 'name', 'pass', 'port', 'server', 'socket', 'transaction'],
-        'cookie' : ['dir', 'domain', 'name', 'ttl', 'value'],
+        'cookie' : ['dir', 'domain', 'name', 'samesite', 'ttl', 'value'],
         'create' : ['dir'],
         'csv' : ['file', 'name', 'sep', 'value'],
         'debug' : ['mode', 'printparam', 'suffix'],
@@ -37,9 +37,9 @@ def get_tag_to_attributes():
         'get' : ['format', 'name', 'option', 'tag', 'token', 'value'],
         'http' : ['content', 'get', 'headers', 'name', 'port', 'timeout'],
         'include' : ['file', 'option'],
-        'mail' : ['cc', 'cci', 'charset', 'file', 'from', 'join', 'msg', 'reply', 'smtp', 'subject', 'to', 'type'],
+        'mail' : ['cc', 'cci', 'charset', 'file', 'from', 'headers', 'join', 'msg', 'reply', 'smtp', 'subject', 'to', 'type'],
         'noparse' : [],
-        'pdf' : ['addpage', 'align', 'bgcolor', 'border', 'calc', 'close', 'color', 'file', 'font', 'frame', 'gettext', 'getx', 'gety', 'href', 'leading', 'line', 'mode', 'name', 'padding', 'path', 'rect', 'rotate', 'round', 'size', 'style', 'text'],
+        'pdf' : ['addpage', 'align', 'bgcolor', 'border', 'calc', 'close', 'color', 'file', 'font', 'frame', 'gettext', 'getx', 'gety', 'href', 'leading', 'line', 'mode', 'name', 'padding', 'pagesize', 'path', 'rect', 'rotate', 'round', 'size', 'style', 'text'],
         'pict' : ['border', 'calc', 'close', 'color', 'content', 'copy', 'dest', 'fill', 'font', 'geth', 'getw', 'height', 'name', 'path', 'position', 'rect', 'rotate', 'size', 'text', 'transparency', 'width', 'x', 'y'],
         'scope' : ['name'],
         'set' : ['bit', 'bitoff', 'biton', 'by', 'charset', 'chartohexa', 'datetime', 'decode64', 'decrypt', 'encode64', 'encrypt', 'expr', 'format', 'global', 'hash', 'hex2bin', 'hexatochar', 'hmac', 'html2text', 'keycode', 'lang', 'len', 'local', 'lowcase', 'ltrim', 'money', 'name', 'noaccent', 'rand', 'replace', 'return', 'rtrim', 'session', 'strcode', 'strdecode', 'strescape', 'svg2pdf', 'trim', 'upcase', 'urlcode', 'value', 'xmlcode'],
@@ -84,9 +84,9 @@ def get_attribute_to_values():
         # <debug> <file> <pdf>
         'mode' : ['<debug mode:', 'auto', 'normal', 'off', '<file mode:', 'append', 'read', 'write', '<pdf mode:', 'clip', 'noclip', 'pagebreak'],
         # <include> <sql>
-        'option' : ['<include option:', 'noparse', 'parse', '<setarea option:', 'parse', 'noparse', '<sql option:', 'enter', 'notenter'],
-        # <mail>
-        'type' : ['html', 'multipart', 'text'],
+        'option' : ['<include option:', 'noparse', 'once', 'parse', '<setarea option:', 'parse', 'noparse', '<sql option:', 'enter', 'notenter'],
+        # <cookie>
+        'samesite' : ['Lax', 'Strict'],
         # <connect>
         'server' : ['localhost'],
         # <mail>
@@ -94,11 +94,11 @@ def get_attribute_to_values():
         # <pdf>
         'style' : ['b', 'i', 'n', 'u'],
         # <http>
-        'timeout' : ['60'],
-        # <mail>
-        'type' : ['html', 'multipart', 'text'],
+        'timeout' : ['30', '60'],
         # <connect>
-        'transaction' : ['normal', 'rollback']
+        'transaction' : ['normal', 'rollback'],
+        # <mail>
+        'type' : ['html', 'multipart', 'text']
     }
 
     # Assume that global attributes are common to all HTML elements
