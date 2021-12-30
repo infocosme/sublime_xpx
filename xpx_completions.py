@@ -29,11 +29,12 @@ def get_tag_to_attributes():
         'connect' : ['base', 'close', 'id', 'info', 'name', 'pass', 'port', 'server', 'socket', 'transaction'],
         'cookie' : ['dir', 'domain', 'name', 'ttl', 'value'],
         'create' : ['dir'],
+        'csv' : ['file', 'name', 'sep', 'value'],
         'debug' : ['mode', 'printparam', 'suffix'],
         'else' : ['expr'],
         'file' : ['close', 'content', 'delete', 'eol', 'exist', 'name', 'mode', 'model', 'open', 'path', 'read', 'write', 'xpx'],
         'function' : ['name', 'exec'],
-        'get' : ['format', 'name', 'option', 'token', 'value'],
+        'get' : ['format', 'name', 'option', 'tag', 'token', 'value'],
         'http' : ['content', 'get', 'headers', 'name', 'port', 'timeout'],
         'include' : ['file', 'option'],
         'mail' : ['cc', 'cci', 'charset', 'file', 'from', 'join', 'msg', 'reply', 'smtp', 'subject', 'to', 'type'],
@@ -41,7 +42,7 @@ def get_tag_to_attributes():
         'pdf' : ['addpage', 'align', 'bgcolor', 'border', 'calc', 'close', 'color', 'file', 'font', 'frame', 'gettext', 'getx', 'gety', 'href', 'leading', 'line', 'mode', 'name', 'padding', 'path', 'rect', 'rotate', 'round', 'size', 'style', 'text'],
         'pict' : ['border', 'calc', 'close', 'color', 'content', 'copy', 'dest', 'fill', 'font', 'geth', 'getw', 'height', 'name', 'path', 'position', 'rect', 'rotate', 'size', 'text', 'transparency', 'width', 'x', 'y'],
         'scope' : ['name'],
-        'set' : ['bit', 'bitoff', 'biton', 'by', 'charset', 'datetime', 'decode64', 'encode64', 'expr', 'format', 'global', 'hash', 'hex2bin', 'hexatochar', 'hmac', 'html2text', 'keycode', 'lang', 'len', 'local', 'lowcase', 'ltrim', 'money', 'name', 'noaccent', 'rand', 'replace', 'return', 'rtrim', 'strcode', 'strdecode', 'strescape', 'svg2pdf', 'trim', 'upcase', 'urlcode', 'value', 'xmlcode'],
+        'set' : ['bit', 'bitoff', 'biton', 'by', 'charset', 'chartohexa', 'datetime', 'decode64', 'decrypt', 'encode64', 'encrypt', 'expr', 'format', 'global', 'hash', 'hex2bin', 'hexatochar', 'hmac', 'html2text', 'keycode', 'lang', 'len', 'local', 'lowcase', 'ltrim', 'money', 'name', 'noaccent', 'rand', 'replace', 'return', 'rtrim', 'session', 'strcode', 'strdecode', 'strescape', 'svg2pdf', 'trim', 'upcase', 'urlcode', 'value', 'xmlcode'],
         'setarea' : ['name', 'option'],
         'sql' : ['connect', 'maxrows', 'option', 'query', 'start'],
         'wait' : ['value'],
@@ -83,7 +84,7 @@ def get_attribute_to_values():
         # <debug> <file> <pdf>
         'mode' : ['<debug mode:', 'auto', 'normal', 'off', '<file mode:', 'append', 'read', 'write', '<pdf mode:', 'clip', 'noclip', 'pagebreak'],
         # <include> <sql>
-        'option' : ['<include option:', 'noparse', 'parse', '<sql option:', 'enter', 'notenter'],
+        'option' : ['<include option:', 'noparse', 'parse', '<setarea option:', 'parse', 'noparse', '<sql option:', 'enter', 'notenter'],
         # <mail>
         'type' : ['html', 'multipart', 'text'],
         # <connect>
@@ -94,6 +95,8 @@ def get_attribute_to_values():
         'style' : ['b', 'i', 'n', 'u'],
         # <http>
         'timeout' : ['60'],
+        # <mail>
+        'type' : ['html', 'multipart', 'text'],
         # <connect>
         'transaction' : ['normal', 'rollback']
     }
@@ -226,6 +229,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('connect\tXPX', '<connect $1>\n'),
             ('cookie\tXPX', '<cookie name=\"$1\">'),
             ('create\tXPX', '<create dir=\"$1\">'),
+            ('csv\tXPX', '<csv $1>$0</csv>\n'),
             ('debug\tXPX', '<debug>'),
             ('else\tXPX', '<else>'),
             ('file\tXPX', '<file>'),
@@ -271,6 +275,8 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('connect\tXPX', 'connect server=\"$1\" base=\"$2\" name=\"$3\" pass=\"$4\">'),
             ('cookie name\tXPX', 'cookie name=\"$1\">'),
             ('create dir\tXPX', 'create dir=\"$1\">'),
+            ('csv name\tXPX', 'csv name=\"$1\">'),
+            ('csv file\tXPX', 'csv file=\"$1\">'),
             ('debug\tXPX', 'debug>'),
             ('else\tXPX', 'else>'),
             ('else expr\tXPX', 'else expr=\"$1\">'),
