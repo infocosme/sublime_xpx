@@ -1,7 +1,6 @@
 import sublime, sublime_plugin
 import re
 
-# Deux fonctions déjà définies dans HTML : détruites.
 
 def match(rex, str):
     m = rex.match(str)
@@ -66,7 +65,7 @@ def get_tag_to_attributes():
 
 def get_attribute_to_values():
     """
-    Returns a dictionary with properties accociated to attribute
+    Returns a dictionary with properties associated to attribute
     """
 
     # Map attributes to specific properties applicable for that attribute
@@ -233,7 +232,8 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('debug\tXPX', '<debug>'),
             ('else\tXPX', '<else>'),
             ('file\tXPX', '<file>'),
-            ('function\tXPX', '<function name=\"$1\">$0</function>'),
+            ('function name\tXPX', '<function name=\"$1\">$0</function>'),
+            ('function exec\tXPX', '<function exec=\"$1\" />\n$0'),
             ('get\tXPX', '<get value=\"$1\">'),
             ('http\tXPX', '<http name=\"$1\" get=\"$2\" timeout=\"$3\" content=\"$4\">'),
             ('include\tXPX', '<include file=\"$1\">'),
@@ -246,7 +246,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('setarea\tXPX', '<setarea name=\"$1\">$0</setarea>'),
             ('sql\tXPX', '<sql query=\"$1\">$0</sql>'),
             ('wait\tXPX', '<wait value=\"$1\">'),
-            ('while\tXPX', '<while expr=\"$1\">$0</while>'),
+            ('while\tXPX', '<while expr=\"$1\">$0\n<set name=\"$2\" expr=\"$3\"></while>'),
             ('xpath\tXPX', '<xpath>'),
             ('xproc\tXPX', '<xproc>')
         ])
@@ -282,8 +282,9 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('else expr\tXPX', 'else expr=\"$1\">'),
             ('file\tXPX', 'file>'),
             ('function name\tXPX', 'function name=\"$1\">$0</function>'),
-            ('get valueformat\tXPX', 'get value=\"$1\" format=\"$2\">'),
-            ('get valuetoken\tXPX', 'get value=\"$1\" token=\"$2\" name=\"$3\">'),
+            ('function exec\tXPX', 'function exec=\"$1\" />'),
+            ('get value format\tXPX', 'get value=\"$1\" format=\"$2\">'),
+            ('get value token\tXPX', 'get value=\"$1\" token=\"$2\" name=\"$3\">'),
             ('http\tXPX', 'http name=\"$1\" get=\"$2\" timeout=\"$3\" content=\"$4\">'),
             ('include file\tXPX', 'include file=\"$1\">'),
             ('mail\tXPX', 'mail smtp=\"$1\"\n\t\tfrom=\"$2\"\n\t\tto=\"$3\"\n\t\tsubject=\"$4\"\n\t\ttype=\"$5\">'),
@@ -291,14 +292,16 @@ class XpxTagCompletions(sublime_plugin.EventListener):
             ('pdf\tXPX', 'pdf>'),
             ('pict name\tXPX', 'pict name=\"$1\" dest=\"$2\">'),
             ('scope\tXPX', 'scope>$0</scope>'),
-            ('set namevalue\tXPX', 'set name=\"$1\" value=\"$2\">'),
-            ('set nameexpr\tXPX', 'set name=\"$1\" expr=\"$2\">'),
-            ('set nameencode64\tXPX', 'set name=\"$1\" encode64=\"$2\">'),
-            ('set namehash\tXPX', 'set name=\"$1\" value=\"$2\" hash=\"$3\" hmac=\"$4\">'),
+            ('set name value\tXPX', 'set name=\"$1\" value=\"$2\">'),
+            ('set name expr\tXPX', 'set name=\"$1\" expr=\"$2\">'),
+            ('set name encode64\tXPX', 'set name=\"$1\" encode64=\"$2\">'),
+            ('set name hash\tXPX', 'set name=\"$1\" value=\"$2\" hash=\"$3\" hmac=\"$4\">'),
             ('set datetime\tXPX', 'set datetime=\"$1\" format=\"$2\">'),
             ('set global\tXPX', 'set global=\"$1\">'),
-            ('set namedebug1\tXPX', 'set name=\"phcdebug\" value=\"1\">'),
-            ('set namedebug0\tXPX', 'set name=\"phcdebug\" value=\"0\">'),
+            ('set global phcdebug 1\tXPX', 'set global=\"phcdebug\" value=\"1\">'),
+            ('set global phcdebug 0\tXPX', 'set global=\"phcdebug\" value=\"0\">'),
+            ('set name phcdebug 1\tXPX', 'set name=\"phcdebug\" value=\"1\">'),
+            ('set name phcdebug 0\tXPX', 'set name=\"phcdebug\" value=\"0\">'),
             ('setarea name\tXPX', 'setarea name=\"$1\">$0</setarea>'),
             ('sql query\tXPX', 'sql query=\"$1\">$0</sql>'),
             ('wait value\tXPX', 'wait value=\"$1\">'),
