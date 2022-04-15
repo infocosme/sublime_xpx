@@ -104,12 +104,13 @@ contexts:
         1: punctuation.definition.tag.begin.html
         2: entity.name.tag.block.any.html entity.name.tag.xpx
       push:
-        - meta_scope: meta.tag.block.any.xpx
+        - meta_scope: meta.tag.block.any.xpx meta.tag.block.function.xpx
         # Fin de balise sans /.
         - match: '>'
           scope: punctuation.definition.tag.end.html
           pop: true
-        - include: xpx-attribute-function
+        - include: xpx-attribute-function-name
+        - include: xpx-attribute-function-any
         # Permet l'analyse syntaxique des attributs non déterminés de la balise XPX/function (arguments).
         - include: 'scope:text.html.basic#tag-stuff'
 
@@ -152,8 +153,34 @@ contexts:
           pop: true
 
   # Définir une région (scope) d'une propriété de balise XPX par mot-clé.
-  # Région des arguments function différent des propriétés définies.
-  xpx-attribute-function:
+  # Région de la propriété name de function.
+  xpx-attribute-function-name:
+    # Pour la balise function : n'importe quel nom de propriété.
+    - match: '\s+\b((?i)(name)\b\s*(=)\s*)'
+      captures:
+        1: meta.attribute-with-value.html
+        2: entity.other.attribute-name.xpx
+        3: punctuation.separator.key-value.html
+      push:
+        - match: '"'
+          scope: punctuation.definition.string.begin.xpx
+          set:
+            # Eliminer tous les guillements échappés.
+            - match: '\\"'
+            - meta_scope: meta.attribute-with-value.html string.quoted.double.html
+            # Définir explicitement un scope d'indexation symbol : entity.function.name.xpx
+            - meta_content_scope: entity.other.attribute-value.xpx entity.function.name.xpx
+            - match: '"'
+              scope: punctuation.definition.string.end.xpx
+              pop: true
+            - match: '\$'
+              push: xpx-variable
+        - match: ''
+          pop: true
+
+  # Définir une région (scope) d'une propriété de balise XPX par mot-clé.
+  # Région des arguments function (définies par dev.) différent des propriétés imposées par langage : name et exec.
+  xpx-attribute-function-any:
     # Pour la balise function : n'importe quel nom de propriété.
     - match: '\s+\b(([a-zA-Z0-9_]*)\b\s*(=)\s*)'
       captures:
