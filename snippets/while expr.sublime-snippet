@@ -1,0 +1,9 @@
+<snippet>
+	<scope>text.html.xpx - (meta.tag.inline.any.xpx | meta.tag.block.any.xpx)</scope>
+	<tabTrigger>whilee</tabTrigger>
+	<content>
+		<![CDATA[while expr="$1">
+	$0
+</while>]]>
+	</content>
+</snippet>

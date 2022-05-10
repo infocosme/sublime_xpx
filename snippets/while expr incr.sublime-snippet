@@ -1,0 +1,11 @@
+<snippet>
+	<scope>text.html.xpx - (meta.tag.inline.any.xpx | meta.tag.block.any.xpx)</scope>
+	<tabTrigger>whileei</tabTrigger>
+	<content>
+		<![CDATA[set name="$1" value="$2">
+<while expr="$3">
+	$0
+	<set name="$4" expr="$5"
+</while>]]>
+	</content>
+</snippet>

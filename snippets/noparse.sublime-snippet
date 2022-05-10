@@ -1,0 +1,9 @@
+<snippet>
+	<scope>text.html.xpx - (meta.tag.inline.any.xpx | meta.tag.block.any.xpx)</scope>
+	<tabTrigger>noparse</tabTrigger>
+	<content>
+		<![CDATA[noparse>
+	$0
+</noparse>]]>
+	</content>
+</snippet>
