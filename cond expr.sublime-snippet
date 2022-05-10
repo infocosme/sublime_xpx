@@ -1,9 +1,0 @@
-<snippet>
-	<scope>text.html.xpx - (meta.tag.inline.any.xpx | meta.tag.block.any.xpx)</scope>
-	<tabTrigger>conde</tabTrigger>
-	<content>
-		<![CDATA[cond expr="$1">
-	$0
-</cond>]]>
-	</content>
-</snippet>
