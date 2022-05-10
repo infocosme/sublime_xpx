@@ -1,10 +1,11 @@
 // These settings override both User and Default settings for the XPX syntax
 {
+	// Set to true to disable default completions.
+	"disable_default_completions": false,
 	"color_scheme": "Packages/XPX/XPX.tmTheme",
 	"tab_size": 3,
 	"margin": 3,
-    "word_wrap": "false",
+	"word_wrap": "false",
 	"default_line_ending": "unix",
-    "auto_complete_cycle": false,
-    "xpx_inline_tags_list": "set"
+	"auto_complete_cycle": false,
 }

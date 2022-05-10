@@ -1,31 +1,197 @@
-import sublime, sublime_plugin
+import html
+import html.entities
 import re
 
+import sublime
+import sublime_plugin
+import timeit
 
-def match(rex, str):
-    m = rex.match(str)
-    if m:
-        return m.group(0)
+from functools import cached_property, wraps
+
+__all__ = ['XpxTagCompletions']
+
+KIND_ENTITY_MARKUP = (sublime.KIND_ID_MARKUP, 'e', 'Entity')
+KIND_ENTITY_SNIPPET = (sublime.KIND_ID_SNIPPET, 'e', 'Entity')
+KIND_ATTRIBUTE_SNIPPET = (sublime.KIND_ID_SNIPPET, 'a', 'Attribute')
+KIND_TAG_MARKUP = (sublime.KIND_ID_MARKUP, 't', 'Tag')
+KIND_TAG_SNIPPET = (sublime.KIND_ID_SNIPPET, 's', 'Tag')
+KIND_ATTRIBUTE_VALUE = (sublime.KIND_ID_VARIABLE, 'v', 'Variable')
+
+ENABLE_TIMING = False
+
+
+boolean_attributes = {
+}
+
+
+def xpx_timing(func):
+    @wraps(func)
+    def wrap(*args, **kw):
+        if ENABLE_TIMING:
+            ts = timeit.default_timer()
+        result = func(*args, **kw)
+        if ENABLE_TIMING:
+            te = timeit.default_timer()
+            print(f"{func.__name__}({args}, {kw}) took: {1000.0 * (te - ts):2.3f} ms")
+        return result
+    return wrap
+
+
+def xpx_match(pattern, string):
+    match = pattern.match(string)
+    if match:
+        return match.group(0)
     else:
         return None
 
-def make_completion(tag):
-    # make it look like
-    # ("table\tTag", "table>$1</table>"),
-    return (tag + '\tTag', tag + '>$0</' + tag + '>')
 
-def get_tag_to_attributes():
+def get_xpx_entity_completions():
+    """
+    Generate a completion list for XPX entities.
+    """
+    return sublime.CompletionList(
+        [
+            sublime.CompletionItem(
+                trigger='#00;',
+                completion='#${1:00};',
+                completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
+                kind=KIND_ENTITY_SNIPPET,
+                details='Base-10 Unicode character',
+            ),
+            sublime.CompletionItem(
+                trigger='#x0000;',
+                completion='#x${1:0000};',
+                completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
+                kind=KIND_ENTITY_SNIPPET,
+                details='Base-16 Unicode character',
+            ),
+            *(
+                sublime.CompletionItem(
+                    trigger=entity,
+                    annotation=printed,
+                    completion=entity,
+                    completion_format=sublime.COMPLETION_FORMAT_TEXT,
+                    kind=KIND_ENTITY_MARKUP,
+                    details=f'Renders as <code>{printed}</code>',
+                )
+                for entity, printed in html.entities.html5.items()
+                if entity.endswith(';')
+            )
+        ],
+        sublime.INHIBIT_WORD_COMPLETIONS
+    )
+
+
+def get_xpx_tag_completions(inside_tag=True):
+    """
+    Generate a default completion list for XPX
+    """
+    normal_tags = (
+        'cond','csv','debug',
+        'function',
+        'scope','setarea','sql','while'
+    )
+    inline_tags = (
+        'connect','cookie','create','debug',
+        'else','file','function','get','http','include','mail','pdf','pict',
+        'set','system','wait','xpath','xproc'
+    )
+    snippet_tags = (
+        ('file close', 'file close=\"$1\" />$0'),
+    )
+
+    tag_begin = '' if inside_tag else '<'
+
+    # Ajout de l'expand inline (le deuxième).
+    return sublime.CompletionList(
+        [
+            *(
+                sublime.CompletionItem(
+                    trigger=tag,
+                    annotation='block xpx',
+                    completion=f'{tag_begin}{tag}>$0</{tag}>',
+                    completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
+                    kind=KIND_TAG_MARKUP,
+                    details=f'Expands to <code>&lt;{tag}&gt;$0&lt;/{tag}&gt;</code>'
+                )
+                for tag in normal_tags
+            ),
+            *(
+                sublime.CompletionItem(
+                    trigger=tag,
+                    annotation='inline xpx',
+                    completion=f'{tag_begin}{tag} $0/>',
+                    completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
+                    kind=KIND_TAG_MARKUP,
+                    details=f'Expands to <code>&lt;{tag} /&gt;</code>'
+                )
+                for tag in inline_tags
+            ),
+            *(
+                sublime.CompletionItem(
+                    trigger=tag,
+                    annotation='snippet xpx',
+                    completion=f'{tag_begin}{completion}',
+                    completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
+                    kind=KIND_TAG_SNIPPET,
+                    details=f'Expands to <code>&lt;{html.escape(completion)}</code>'
+                )
+                for tag, completion in snippet_tags
+            )
+        ],
+        sublime.INHIBIT_WORD_COMPLETIONS
+    )
+
+
+def get_list_attributes(view, pt, tagname, endpt):
+    #print("get_list_attributes")
+
+    listAttrName = []
+    execName = ""
+    #print("pt:", end="")
+    #print(pt, end=" ")
+    #print("end:", end="")
+    #print(endpt)
+    mypt = pt + len(tagname)
+    while (mypt<endpt):
+        # Recherche du nom de l'attribut.
+        myPosPunctuation = view.find_by_class(mypt, True, sublime.CLASS_PUNCTUATION_START)
+        #print(myPosPunctuation)
+        mynext = view.substr(sublime.Region(myPosPunctuation, myPosPunctuation+1))
+        if ( mynext == '/' or mynext == '>'):
+            break
+        myPosAttributeName = view.find_by_class(myPosPunctuation, False, sublime.CLASS_WORD_START)
+        myAttributeName = view.substr(sublime.Region(myPosAttributeName, myPosPunctuation))
+        listAttrName.append(myAttributeName)
+        #print(myAttributeName)
+        mypt = myPosPunctuation
+        #print(view.substr(sublime.Region(mypt, mypt+1)))
+        #print(mypt)
+        mynext = view.substr(sublime.Region(mypt, mypt+3))
+        #print(mynext)
+        if (mynext == '=""'):
+            myPosPunctuation1 = mypt + 2
+        else:
+            myPosPunctuation1 = view.find_by_class(mypt, True, sublime.CLASS_PUNCTUATION_START)
+        #print(myPosPunctuation1)
+        myAttributeValue = view.substr(sublime.Region(mypt+2, myPosPunctuation1))
+        if (myAttributeName == "exec"):
+            execName = myAttributeValue
+        #print("val:'", end="")
+        #print(myAttributeValue, end="'")
+        #print()
+        mypt = myPosPunctuation1
+    return listAttrName, execName
+
+
+def get_xpx_tag_attributes(view, pt):
     """
     Returns a dictionary with attributes accociated to tags
-    This assumes that all tags can have global attributes as per MDN:
-    https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
     """
-
     # Map tags to specific attributes applicable for that tag
-    # Cette liste est utilisée pour la suggestion des attributs en fonction de la balise.
-    tag_dict = {
-        'cond' : ['expr'],
-        'connect' : ['base', 'close', 'id', 'info', 'name', 'pass', 'port', 'server', 'socket', 'transaction'],
+    tag_attr_dict = {
+        'cond': ['expr'],
+        'connect': ['base', 'close', 'id', 'info', 'name', 'pass', 'port', 'server', 'socket', 'transaction'],
         'cookie' : ['dir', 'domain', 'name', 'samesite', 'ttl', 'value'],
         'create' : ['dir'],
         'csv' : ['file', 'name', 'sep', 'value'],
@@ -47,272 +213,265 @@ def get_tag_to_attributes():
         'wait' : ['value'],
         'while' : ['expr'],
         'xpath' : ['file', 'select', 'value'],
-        'xproc' : ['file', 'select', 'value']
+        'xproc': ['file', 'select', 'value']
     }
 
-    # Assume that global attributes are common to all HTML elements
-    global_attributes = [
-    ]
+    # Assume that global attributes are common to all XPX elements
+    # Pas d'attributs globaux en XPX : désactivation du code.
+    """
+    global_attributes = (
+    )
 
-    # Extend `global_attributes` by the event handler attributes
-    global_attributes.extend([
-    ])
-
-    for attributes in tag_dict.values():
+    for attributes in tag_attr_dict.values():
         attributes.extend(global_attributes)
-
-    return tag_dict
-
-def get_attribute_to_values():
-    """
-    Returns a dictionary with properties associated to attribute
     """
 
-    # Map attributes to specific properties applicable for that attribute
-    # Cette liste est utilisée pour la suggestion des propriétés en fonction de l'attribut.
+    # Complément avec un éventuel prototype de fonction.
+    # Contrôle si la complétion a été demandée (view, pt) sur un function exec dont la valeur existe.
+    # Recherche du prototype correspondant parmi les symbol.
+    # Renvoi des attributs du prototype trouvé.
+    
+    # Lecture de la région tag dans laquelle la complétion est demandée.
+    myregionfunction = view.expand_by_class(pt,sublime.CLASS_PUNCTUATION_START | sublime.CLASS_PUNCTUATION_END,"<>")
+    #print(myregionfunction)
+    #print(view.substr(myregionfunction))
+    # Lecture du début de la région.
+    ptfindtag = myregionfunction.begin()+1
+    # Lecture du nom du tag de la région courante.
+    # myTagName=view.substr(view.expand_by_class(ptfindtag,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END))
+    myTagName = view.substr(view.word(ptfindtag))
+    if (myTagName == 'function'):
+        #print("completion dans function")
+        myresult = get_list_attributes(view, ptfindtag-1, myTagName, myregionfunction.end())
+        #print(myresult[0])
+        #print(myresult[1])
+        if ('exec' in myresult[0]):
+            #print("Recherche du prototype function ", end="")
+            #print(myresult[1])
+            mywindow = sublime.active_window()
+            # Recherche d'une entrée symbol correspondant au nom de la fonction.
+            mylocations=mywindow.symbol_locations("<function name=\"xpxForms.writeCache\" formName=\"\">",sublime.SYMBOL_SOURCE_INDEX,sublime.SYMBOL_TYPE_DEFINITION)
+            #print(mylocations)
+    
+    return tag_attr_dict
+
+
+def get_xpx_attribute_values(myAttributeName):
+    """
+    Fonction créée pour XPX.
+    Returns a dictionary with values accociated to attributes.
+    """
+    # Map attributes to specific values applicable for that attribute
+    # First: Attribute name, Second: Tag name to associate.
     attribute_dict = {
-        # <pdf>
-        'align' : ['center', 'left', 'right'],
-        # <mail>
-        'charset' : ['iso-8859-1', 'utf-8'],
-        # <pdf>
-        'font' : ['Courier', 'Helvetica', 'Times', 'Symbol', 'ZapfDingbats'],
-        # <set>
-        'format' : ['yyyy-mm-dd', 'yymmddhhmnss', 'tt'],
-        'hash' : ['md5', 'sha1', 'sha256'],
-        # <debug> <file> <pdf>
-        'mode' : ['<debug mode:', 'auto', 'normal', 'off', '<file mode:', 'append', 'read', 'write', '<pdf mode:', 'clip', 'noclip', 'pagebreak'],
-        # <include> <sql>
-        'option' : ['<include option:', 'noparse', 'once', 'parse', '<setarea option:', 'parse', 'noparse', '<sql option:', 'enter', 'notenter'],
-        # <cookie>
-        'samesite' : ['Lax', 'Strict'],
-        # <connect>
-        'server' : ['localhost'],
-        # <mail>
-        'smtp' : ['localhost'],
-        # <pdf>
-        'style' : ['b', 'i', 'n', 'u'],
-        # <http>
-        'timeout' : ['30', '60'],
-        # <connect>
-        'transaction' : ['normal', 'rollback'],
-        # <mail>
-        'type' : ['html', 'multipart', 'text']
+        'align' : {
+            'pdf': ['center', 'left', 'right']
+        },
+        'charset' : {
+            'mail': ['iso-8859-1', 'utf-8']
+        },
+        'font' : {
+            'pdf': ['Courier', 'Helvetica', 'Times', 'Symbol', 'ZapfDingbats']
+        },
+        'format' : {
+            'set': ['yyyy-mm-dd', 'yymmddhhmnss', 'tt']
+        },
+        'hash' : {
+            'set': ['md5', 'sha1', 'sha256']
+        },
+        'mode' : {
+            'debug': ['auto', 'normal', 'off'],
+            'file': ['append', 'read', 'write'],
+            'pdf': ['clip', 'noclip', 'pagebreak']
+        },
+        'option' : {
+            'include': ['noparse', 'once', 'parse'], 
+            'setarea': ['parse', 'noparse'],
+            'sql': ['enter', 'notenter']
+        },
+        'samesite' : {
+            'cookie': ['Lax', 'Strict']
+        },
+        'server' : {
+            'connect': ['localhost']
+        },
+        'smtp' : {
+            'mail': ['localhost']
+        },
+        'style' : {
+            'pdf': ['b', 'i', 'n', 'u']
+        },
+        'timeout' : {
+            'http': ['30', '60']
+        },
+        'transaction' : {
+            'connect': ['normal', 'rollback']
+        },
+        'type' : {
+            'mail': ['html', 'multipart', 'text']
+        }
     }
+    if myAttributeName in attribute_dict.keys():
+        return attribute_dict.get(myAttributeName, [])
+    return None
 
-    # Assume that global attributes are common to all HTML elements
-    global_values = [
-    ]
-
-    # Extend `global_attributes` by the event handler attributes
-    global_values.extend([
-    ])
-
-    for value in attribute_dict.values():
-        value.extend(global_values)
-
-    return attribute_dict
 
 class XpxTagCompletions(sublime_plugin.EventListener):
     """
-    Provide tag completions for HTML
-    It matches just after typing the first letter of a tag name
+    Provide tag completions for XPX
     """
-    def __init__(self):
-        completion_list = self.default_completion_list()
-        self.prefix_completion_dict = {}
-        # construct a dictionary where the key is first character of
-        # the completion list to the completion
-        for s in completion_list:
-            prefix = s[0][0]
-            self.prefix_completion_dict.setdefault(prefix, []).append(s)
 
-        # construct a dictionary from (tag, attribute[0]) -> [attribute]
-        self.tag_to_attributes = get_tag_to_attributes()
+    @cached_property
+    def entity_completions(self):
+        return get_xpx_entity_completions()
 
-        # construct a dictionary from (attribute, propertie[0]) -> [propertie]
-        self.attribute_to_values = get_attribute_to_values()
+    @cached_property
+    def tag_abbreviations(self):
+        return get_xpx_tag_completions(inside_tag=False)
 
+    @cached_property
+    def tag_completions(self):
+        return get_xpx_tag_completions(inside_tag=True)
+
+    @cached_property
+    def tag_name_completions(self, view, pt):
+        """
+        Create a completion list with all known tag names (mais sans les < et > de la syntaxe).
+        Uniquement les noms des balises.
+        Cas exceptionnel d'une complétion demandée sur un <>.
+
+        It uses the keys of `self.tag_attributes` dictionary as it contains
+        all known/supported tag names and is available/cached anyway.
+        """
+        return sublime.CompletionList(
+            [
+                sublime.CompletionItem(
+                    trigger=tag,
+                    annotation='xpx',
+                    completion_format=sublime.COMPLETION_FORMAT_TEXT,
+                    kind=KIND_TAG_MARKUP,
+                    details=f'Expands to <code>{html.escape(tag)}</code>'
+                )
+                for tag in get_xpx_tag_attributes(view, pt)
+            ],
+            sublime.INHIBIT_WORD_COMPLETIONS
+        )
+
+    @xpx_timing
     def on_query_completions(self, view, prefix, locations):
-        # Only trigger within XPX
+        """
+        Fonction générale de complétion : tout part de cette fonction.
+        """
+
+        # Complétion XPX uniquement dans un source XPX.
         if not view.match_selector(locations[0], "text.html.xpx"):
-            return []
+            return None
 
-        # Complétion XPX sur les valeurs d'attributs.
-        is_inside_attribute = view.match_selector(locations[0],
-                "text.html.xpx meta.attribute-with-value string.quoted.double")
+        # Complétion XPX uniquement si non interdit en configuration du langage.
+        settings = sublime.load_settings('XPX.sublime-settings')
+        if settings.get('disable_default_completions'):
+            return None
 
-        # check if we are inside a tag
-        # tag XPX reconnu ou début de tag inconnu.
-        is_inside_tag = view.match_selector(locations[0],
-                "text.html.xpx meta.tag - text.html.xpx punctuation.definition.tag.begin")
-
-        return self.get_completions(view, prefix, locations, is_inside_tag, is_inside_attribute)
-
-    def get_completions(self, view, prefix, locations, is_inside_tag, is_inside_attribute):
-
+        # Lecture du caret avant et après afin de déterminer un contexte de complétion.
         pt = locations[0] - len(prefix) - 1
         ch = view.substr(sublime.Region(pt, pt + 1))
 
-        # print('prefix: "', prefix, '"')
-        # print('location0:', locations[0])
-        # print('substr:', view.substr(sublime.Region(locations[0], locations[0] + 3)), '!end!')
-        # print('is_inside_tag', is_inside_tag)
-        # print('ch:', ch)
+        # Complétion sur les codes HTML.
+        # Inutile donc en XPX, déjà pris en compte en HTML.
+        #if ch == '&':
+        #    return self.entity_completions
 
-        completion_list = []
+        # Complétion normale : on démarre une balise donc on affiche les balises XPX possibles.
+        # Se déclenche uniquement à la première tentative de complétion sur <.
+        if ch == '<':
+            if view.match_selector(locations[0], "text.html.xpx - (meta.tag.block.any.xpx | meta.tag.inline.any.xpx)"):
+                # If the caret is in front of `>` complete only tag names.
+                # see: https://github.com/sublimehq/sublime_text/issues/3508
+                ch = view.substr(sublime.Region(locations[0], locations[0] + 1))
+                if ch == '>':
+                    return self.tag_name_completions(view, locations[0])
+                return self.tag_completions
 
-        if is_inside_attribute:
-            completion_list = self.get_values_completions(view, locations[0], prefix)
-            return (completion_list, sublime.INHIBIT_WORD_COMPLETIONS)
+        # Complétion des nom de propriété : attributs
+        # Note: Exclude opening punctuation to enable abbreviations
+        #       if the caret is located directly in front of a xpx tag.
+        # Si la demande de complétion se déclenche dans une balise XPX alors on recherche les attributs possibles.
+        # Le scope doit être balise XPX sans propriété avec valeur : donc normalement emplacement d'un nouvel attribut.
+        # Le caret précédent doit obligatoirement être un séparateur entre la balise et le nom de l'attribut.
+        if view.match_selector(locations[0], "(meta.tag.block.any.xpx | meta.tag.inline.any.xpx) - (entity.name.tag.xpx | entity.other.attribute-name.xpx | entity.other.attribute-value.xpx)"):
+            if ch in ' \f\n\t':
+                return self.attribute_completions(view, locations[0], prefix)
 
-        # Définir la liste sur les attributs du tag courant.
-        if is_inside_tag and ch != '<':
-            if ch in [' ', '\t', '\n']:
-                # maybe trying to type an attribute
-                completion_list = self.get_attribute_completions(view, locations[0], prefix)
-            # only ever trigger completion inside a tag if the previous character is a <
-            # this is needed to stop completion from happening when typing attributes
-            # return (completion_list, sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
-            return (completion_list, sublime.INHIBIT_WORD_COMPLETIONS)
+        if view.match_selector(locations[0], "text.html.xpx meta.attribute-with-value.html string.quoted.double.html - entity.other.attribute-name.xpx"):
+            return self.value_attribute_completions(view, locations[0], prefix)
 
-        # 23/08/2017 : Permettre la complétion des balises XPX à partir de rien (CTRL+Espace)
-        # Définir la liste sur la liste complète des tags XPX : l'utilisateur ne se rappelle pas du nom de la balise.
-        if prefix == '' and ch != '<':
-            # completion_list = self.default_xpx_tags_list()
-            completion_list = []
-            # return (completion_list, sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
-            return (completion_list, sublime.INHIBIT_WORD_COMPLETIONS)
-        if prefix == '' and ch == '<':
-            # need completion list to match
-            # return ([], sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
-            return ([], sublime.INHIBIT_WORD_COMPLETIONS)
+        # Sinon rien.
+        return None
 
-        # match completion list using prefix
-        # L'utilisateur teste une première lettre pour filtrer les noms de balises.
-        completion_list = self.prefix_completion_dict.get(prefix[0], [])
-
-        # if the opening < is not here insert that
-        # Cas d'une demande d'auto-complétion sans saisie préalable du < (Ctrl+Espace).
-        if ch != '<':
-            completion_list = [(pair[0], '<' + pair[1]) for pair in completion_list]
-
-        flags = 0
-        if is_inside_tag:
-            # flags = sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS
-            flags = sublime.INHIBIT_WORD_COMPLETIONS
-
-        return (completion_list, flags)
-
-    def default_xpx_tags_list(self):
+    def expand_tag_attributes(self, view, locations):
         """
-        Generate a default completion list for XPX Tags
-        Aide à la recherche du nom de la balise.
+        The method responds to on_query_completions, but conceptually it's
+        expanding expressions, rather than completing words.
+
+        It expands these simple expressions:
+
+            tag.class -> <tag class="class"></tag>
+            tag#id    -> <tag id="id"></tag>
+        
+        Recherche des balises possibles et des snippets possibles.
         """
 
-        default_list = []
-        # Liste des tags XPX normaux : de type block ?
-        # 'cond', 'function', 'noparse', 'scope', 'setarea', 'sql', 'while'
-        normal_tags = ([
-        ])
+        # Get the contents of each line, from the beginning of the line to
+        # each point
+        lines = [
+            view.substr(sublime.Region(view.line(pt).a, pt))
+            for pt in locations
+        ]
 
-        for tag in normal_tags:
-            default_list.append(make_completion(tag))
-            default_list.append(make_completion(tag.upper()))
+        # Reverse the contents of each line, to simulate having the regex
+        # match backwards
+        lines = [line[::-1] for line in lines]
 
-        # Cette liste est utilisée pour remplir la suggestion de balise à la frappe.
-        # L'expand de balise s'effectue sur le premier snippet ne contenant que 2 arguments.
-        # set name value sera ignoré vs set namevalue qui sera accepté.
-        default_list += ([
-            ('cond\tXPX', '<cond $1>$0</cond>\n'),
-            ('connect\tXPX', '<connect $1>\n'),
-            ('cookie\tXPX', '<cookie name=\"$1\">'),
-            ('create\tXPX', '<create dir=\"$1\">'),
-            ('csv\tXPX', '<csv $1>$0</csv>\n'),
-            ('debug\tXPX', '<debug>'),
-            ('else\tXPX', '<else>'),
-            ('file\tXPX', '<file>'),
-            ('function name\tXPX', '<function name=\"$1\">$0</function>'),
-            ('function exec\tXPX', '<function exec=\"$1\" />\n$0'),
-            ('get\tXPX', '<get value=\"$1\">'),
-            ('http\tXPX', '<http name=\"$1\" get=\"$2\" timeout=\"$3\" content=\"$4\">'),
-            ('include\tXPX', '<include file=\"$1\">'),
-            ('mail\tXPX', '<mail smtp=\"$1\"\n\t\tfrom=\"$2\"\n\t\tto=\"$3\"\n\t\tsubject=\"$4\"\n\t\ttype=\"$5\">'),
-            ('noparse\tXPX', '<noparse>$0</noparse>'),
-            ('pdf\tXPX', '<pdf>'),
-            ('pict\tXPX', '<pict name=\"$1\" dest=\"$2\">'),
-            ('scope\tXPX', '<scope>$0</scope>'),
-            ('set\tXPX', '<set>'),
-            ('setarea\tXPX', '<setarea name=\"$1\">$0</setarea>'),
-            ('sql\tXPX', '<sql query=\"$1\">$0</sql>'),
-            ('wait\tXPX', '<wait value=\"$1\">'),
-            ('while\tXPX', '<while expr=\"$1\">$0\n<set name=\"$2\" expr=\"$3\"></while>'),
-            ('xpath\tXPX', '<xpath>'),
-            ('xproc\tXPX', '<xproc>')
-        ])
+        # Check the first location looks like an expression
+        pattern = re.compile(r"([-\w]+)([.#])(\w+)")
+        expr = xpx_match(pattern, lines[0])
+        if not expr:
+            return None
 
-        return default_list
+        # Ensure that all other lines have identical expressions
+        for line in lines[1:]:
+            ex = xpx_match(pattern, line)
+            if ex != expr:
+                return None
 
-    def default_completion_list(self):
+        # Return the completions
+        arg, op, tag = pattern.match(expr).groups()
+
+        arg = arg[::-1]
+        tag = tag[::-1]
+        expr = expr[::-1]
+
+        attr = 'class' if op == '.' else 'id'
+        snippet = f'<{tag} {attr}=\"{arg}\">$0</{tag}>'
+
+        return sublime.CompletionList(
+            [
+                sublime.CompletionItem(
+                    trigger=expr,
+                    completion=snippet,
+                    completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
+                    kind=KIND_TAG_MARKUP,
+                    details=f'Expands to <code>{html.escape(snippet)}</code>'
+                )
+            ],
+            sublime.INHIBIT_WORD_COMPLETIONS
+        )
+
+    def attribute_completions(self, view, pt, prefix):
         """
-        Generate a default completion list for HTML
+        Recherche des attributs possibles pour le tag courant.
         """
-        default_list = []
-        normal_tags = ([
-        ])
 
-        for tag in normal_tags:
-            default_list.append(make_completion(tag))
-            default_list.append(make_completion(tag.upper()))
-
-        # Cette liste est utilisée pour remplir la suggestion de balise à la frappe.
-        # L'expand de balise s'effectue sur le premier snippet ne contenant que 2 arguements.
-        # "set name value" sera ignoré vs "set namevalue" qui sera accepté.
-        default_list += ([
-            ('cond\tXPX', 'cond expr=\"$1\">\n\t$2\n</cond>$0'),
-            ('cond else\tXPX', 'cond expr=\"$1\">\n\t$2\n<else>\n\t$3\n</cond>$0'),
-            ('cond else expr\tXPX', 'cond expr=\"$1\">\n\t$2\n<else expr=\"$3\">\n\t$4\n<else>\n\t$5\n</cond>$0'),
-            ('connect\tXPX', 'connect server=\"$1\" base=\"$2\" name=\"$3\" pass=\"$4\">'),
-            ('cookie name\tXPX', 'cookie name=\"$1\">'),
-            ('create dir\tXPX', 'create dir=\"$1\">'),
-            ('csv name\tXPX', 'csv name=\"$1\">'),
-            ('csv file\tXPX', 'csv file=\"$1\">'),
-            ('debug\tXPX', 'debug>'),
-            ('else\tXPX', 'else>'),
-            ('else expr\tXPX', 'else expr=\"$1\">'),
-            ('file\tXPX', 'file>'),
-            ('function name\tXPX', 'function name=\"$1\">$0</function>'),
-            ('function exec\tXPX', 'function exec=\"$1\" />'),
-            ('get value format\tXPX', 'get value=\"$1\" format=\"$2\">'),
-            ('get value token\tXPX', 'get value=\"$1\" token=\"$2\" name=\"$3\">'),
-            ('http\tXPX', 'http name=\"$1\" get=\"$2\" timeout=\"$3\" content=\"$4\">'),
-            ('include file\tXPX', 'include file=\"$1\">'),
-            ('mail\tXPX', 'mail smtp=\"$1\"\n\t\tfrom=\"$2\"\n\t\tto=\"$3\"\n\t\tsubject=\"$4\"\n\t\ttype=\"$5\">'),
-            ('noparse\tXPX', 'noparse>$0</noparse>'),
-            ('pdf\tXPX', 'pdf>'),
-            ('pict name\tXPX', 'pict name=\"$1\" dest=\"$2\">'),
-            ('scope\tXPX', 'scope>$0</scope>'),
-            ('set name value\tXPX', 'set name=\"$1\" value=\"$2\">'),
-            ('set name expr\tXPX', 'set name=\"$1\" expr=\"$2\">'),
-            ('set name encode64\tXPX', 'set name=\"$1\" encode64=\"$2\">'),
-            ('set name hash\tXPX', 'set name=\"$1\" value=\"$2\" hash=\"$3\" hmac=\"$4\">'),
-            ('set datetime\tXPX', 'set datetime=\"$1\" format=\"$2\">'),
-            ('set global\tXPX', 'set global=\"$1\">'),
-            ('set global phcdebug 1\tXPX', 'set global=\"phcdebug\" value=\"1\">'),
-            ('set global phcdebug 0\tXPX', 'set global=\"phcdebug\" value=\"0\">'),
-            ('set name phcdebug 1\tXPX', 'set name=\"phcdebug\" value=\"1\">'),
-            ('set name phcdebug 0\tXPX', 'set name=\"phcdebug\" value=\"0\">'),
-            ('setarea name\tXPX', 'setarea name=\"$1\">$0</setarea>'),
-            ('sql query\tXPX', 'sql query=\"$1\">$0</sql>'),
-            ('wait value\tXPX', 'wait value=\"$1\">'),
-            ('while expr\tXPX', 'while expr=\"$1\">$0</while>'),
-            ('xpath\tXPX', 'xpath>$0</xpath>'),
-            ('xproc\tXPX', 'xproc>$0</xproc>')
-        ])
-
-        return default_list
-
-    def get_attribute_completions(self, view, pt, prefix):
         SEARCH_LIMIT = 500
         search_start = max(0, pt - SEARCH_LIMIT - len(prefix))
         line = view.substr(sublime.Region(search_start, pt + SEARCH_LIMIT))
@@ -336,7 +495,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
 
         # check that this tag looks valid
         if not tag or not tag.isalnum():
-            return []
+            return None
 
         # determines whether we need to close the tag
         # default to closing the tag
@@ -351,34 +510,59 @@ class XpxTagCompletions(sublime_plugin.EventListener):
                 # found another open tag, need to close this one
                 break
 
-        if suffix == '' and not line_tail.startswith(' ') and not line_tail.startswith('>'):
+        if suffix == '' and line_tail[0] not in ' >':
             # add a space if not there
             suffix = ' '
 
+        # ensure the user can always tab to the end of the completion
+        suffix += '$0'
+
         # got the tag, now find all attributes that match
-        attributes = self.tag_to_attributes.get(tag, [])
-        # ("class\tAttr", "class="$1">"),
-        attri_completions = [(a + '\tAttr', a + '="$1"' + suffix) for a in attributes]
-        return attri_completions
+        # La liste de complétion est filtrée sur les entrées attributes calculées en haut.
+        # Suppression du test sur attributes boolean.
+        #            completion=f'{attr}{suffix}' if attr in boolean_attributes else f'{attr}="$1"{suffix}',
+        # Ajout des view et pt dans prototype tag_attributes afin de pouvoir compléter avec le prototype function éventuel.
+        return sublime.CompletionList(
+            [
+                sublime.CompletionItem(
+                    trigger=attr,
+                    annotation='xpx',
+                    completion=f'{attr}="$1"{suffix}',
+                    completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
+                    kind=KIND_ATTRIBUTE_SNIPPET
+                )
+                for attr in get_xpx_tag_attributes(view, pt).get(tag, [])
+            ],
+            sublime.INHIBIT_WORD_COMPLETIONS
+        )
 
-    # pt = locations[0]
-    # prefix : mot sur lequel la complétion est demandée : partie avant le curseur.
-    # locations[0] : Position du curseur au moment du clic.
-    def get_values_completions(self, view, pt, prefix):
-
-        # print('prefix: "', prefix, '"')
-        # print('pt: "', pt, '"')
-
+    def value_attribute_completions(self, view, pt, prefix):
+        """
+        Recherche du nom d'attribut concerné à partir de pt.
+        prefix n'est pas renseigné.
+        """
+        # Recherche du nom de l'attribut.
         myPosPunctuation = view.find_by_class(pt, False, sublime.CLASS_PUNCTUATION_START)
-        # print('myPosPunctuation: "', myPosPunctuation ,'"')
         myPosAttributeName = view.find_by_class(myPosPunctuation, False, sublime.CLASS_WORD_START)
-        # print('myPosAttributeName: "', myPosAttributeName ,'"')
         myAttributeName = view.substr(sublime.Region(myPosAttributeName, myPosPunctuation))
-        # print('myAttributeName: "', myAttributeName ,'"')
 
-        # got the attribute name, now find all properties values that match
-        values = self.attribute_to_values.get(myAttributeName, [])
-        # ("class\tAttr", "class"),
-        values_completions = [(value + '\tXPX value', value) for value in values]
-        return values_completions
+        # Recherche du nom du tag.
+        ptfindtag = view.expand_by_class(pt,sublime.CLASS_PUNCTUATION_START | sublime.CLASS_PUNCTUATION_END,"<>").begin()+1
+        myTagName=view.substr(view.expand_by_class(ptfindtag,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END))
 
+        # got the tag,attribute, now find all values that match
+        if get_xpx_attribute_values(myAttributeName):
+            return sublime.CompletionList(
+                [
+                    sublime.CompletionItem(
+                        trigger=val,
+                        annotation='xpx',
+                        completion=val,
+                        completion_format=sublime.COMPLETION_FORMAT_TEXT,
+                        kind=KIND_ATTRIBUTE_VALUE
+                    )
+                    for val in get_xpx_attribute_values(myAttributeName).get(myTagName, [])
+                ],
+                sublime.INHIBIT_WORD_COMPLETIONS
+            )
+        return None

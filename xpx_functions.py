@@ -115,7 +115,7 @@ class EventListener(sublime_plugin.EventListener):
 			# Ecriture systématique du context-menu pour actualisation en permanence (à chaque changement de view).
 			encoding = 'utf-8'
 			with open(os.path.join(cache_path, "Context.sublime-menu"), "w") as cache:
-				cache.write(json.dumps(context_menu, cache))
+				cache.write(json.dumps(context_menu))
 
 
 class XpxGotoFunctionNameCommand(sublime_plugin.WindowCommand):

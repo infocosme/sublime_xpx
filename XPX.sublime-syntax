@@ -131,7 +131,7 @@ contexts:
   # Définir une région (scope) d'une propriété de balise XPX par mot-clé.
   xpx-attribute:
     # (?i) case insensitive
-    - match: '\s+\b((?i)(align|addpage|base|bgcolor|bit|bitoff|biton|border|by|calc|cc|cci|charset|chartohexa|close|color|connect|content|datetime|decode64|decrypt|delete|dest|dir|domain|encode64|encrypt|eol|exec|exist|expr|file|font|format|frame|from|get|geth|getw|getx|gety|gettext|global|hash|headers|hex2bin|hexatochar|hmac|href|html2text|id|info|join|keycode|lang|leading|len|line|local|lowcase|ltrim|maxrows|mode|model|money|msg|name|noaccent|open|option|padding|pagesize|pass|path|port|rand|read|rect|replace|reply|return|rotate|round|rtrim|samesite|select|sep|server|session|size|smtp|socket|start|strcode|strdecode|strescape|style|subject|svg2pdf|text|timeout|transaction|trim|ttl|to|token|type|upcase|urlcode|value|write|xmlcode|xpx)\b\s*(=)\s*)'
+    - match: '\s+\b((?i)(align|addpage|base|bgcolor|bit|bitoff|biton|border|by|calc|cc|cci|charset|chartohexa|close|color|connect|content|datetime|decode64|decrypt|delete|dest|dir|domain|encode64|encrypt|eol|exec|exist|expr|file|font|format|frame|from|get|geth|getw|getx|gety|gettext|global|hash|headers|height|hex2bin|hexatochar|hmac|href|html2text|id|info|join|keycode|lang|leading|len|line|local|lowcase|ltrim|maxrows|mode|model|money|msg|name|noaccent|open|option|padding|pagesize|pass|path|port|rand|read|rect|replace|reply|return|rotate|round|rtrim|samesite|select|sep|server|session|size|smtp|socket|start|strcode|strdecode|strescape|style|subject|svg2pdf|text|timeout|transaction|trim|ttl|to|token|type|upcase|urlcode|value|width|write|xmlcode|xpx)\b\s*(=)\s*)'
       captures:
         1: meta.attribute-with-value.html
         2: entity.other.attribute-name.xpx
