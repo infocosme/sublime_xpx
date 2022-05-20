@@ -561,13 +561,24 @@
 		</dict>
 		<dict>
 			<key>name</key>
-			<string>Valeur d'attribut query XPX (SQL)</string>
+			<string>Valeur d'attribut sql query XPX</string>
 			<key>scope</key>
 			<string>entity.other.attribute-value.query.xpx</string>
 			<key>settings</key>
 			<dict>
 				<key>foreground</key>
 				<string>#7F92FF</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Valeur d'attribut function name XPX</string>
+			<key>scope</key>
+			<string>entity.function.name.xpx</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#E6DB74</string>
 			</dict>
 		</dict>
 		<dict>
@@ -595,6 +606,28 @@
 
 
 
+		<dict>
+			<key>name</key>
+			<string>Debug number line</string>
+			<key>scope</key>
+			<string>punctuation.numberline.xpx.debug</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#FF9500</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Debug bloc de lignes tag include</string>
+			<key>scope</key>
+			<string>block.tag.include.xpx.debug</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#A6E22E</string>
+			</dict>
+		</dict>
 
 
 

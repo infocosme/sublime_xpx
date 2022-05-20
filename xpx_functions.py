@@ -6,6 +6,9 @@ import sublime_plugin
 
 
 def getListFunctionName(myview):
+	"""
+	Listing de toutes les définitions de function dans la vue courante.
+	"""
 	maliste = []
 	# Parcours de toutes les occurences de texte comprenant <function name=.
 	for myregionfunction in myview.find_all("<function name=\""):
@@ -52,16 +55,20 @@ class XpxContextMenuFindFunctionDefCommand(sublime_plugin.TextCommand):
 		return "Goto Definition " + functionName
 
 	def run(self, edit, event):
+		"""
+		Exécution de la commande :
+		Ouvrir le fichier source contenant la définition de la function right-cliquée.
+		"""
 		flags = sublime.ENCODED_POSITION | sublime.FORCE_GROUP
 		# Récupération du nom de la fonction ciblée.
 		functionName = self.getFunctionName(event)
 		mywindow = sublime.active_window()
 		# Recherche d'une entrée symbol correspondant au nom de la fonction.
-		mylocations=mywindow.symbol_locations(functionName,sublime.SYMBOL_SOURCE_INDEX,sublime.SYMBOL_TYPE_DEFINITION)
+		mylocations=mywindow.symbol_locations(functionName,sublime.SYMBOL_SOURCE_INDEX,sublime.SYMBOL_TYPE_DEFINITION,sublime.KIND_ID_FUNCTION)
 		if (len(mylocations)>0):
 			# En cas de file trouvé, affichage de chacun des files trouvés (normalement un seul).
 			for l in mylocations:
-				mywindow.open_file(l.path_encoded_position(), flags)
+				myview = mywindow.open_file(l.path_encoded_position(), flags)
 
 
 class EventListener(sublime_plugin.EventListener):

@@ -1,6 +1,8 @@
 %YAML 1.2
 ---
 name: XPX
+symbol_name: XPX
+version: 2
 file_extensions:
   - xpx
   - phc
@@ -169,7 +171,8 @@ contexts:
             - match: '\\"'
             - meta_scope: meta.attribute-with-value.html string.quoted.double.html
             # Définir explicitement un scope d'indexation symbol : entity.function.name.xpx
-            - meta_content_scope: entity.other.attribute-value.xpx entity.function.name.xpx
+            # entity.name.function pour le classement du nom de la fonction dans les symbols.
+            - meta_content_scope: entity.other.attribute-value.xpx entity.name.function entity.function.name.xpx
             - match: '"'
               scope: punctuation.definition.string.end.xpx
               pop: true
