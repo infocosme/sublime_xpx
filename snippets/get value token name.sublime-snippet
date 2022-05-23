@@ -1,5 +1,5 @@
 <snippet>
-	<scope>text.html.xpx - (meta.tag.inline.any.xpx | meta.tag.block.any.xpx)</scope>
+	<scope>text.xpx - meta.tag.xpx</scope>
 	<tabTrigger>getvtn</tabTrigger>
 	<content>
 		<![CDATA[get value="$1" token="$2" name="$3" />$0]]>

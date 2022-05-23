@@ -1,6 +1,6 @@
 <snippet>
-	<scope>text.html.xpx - (meta.tag.inline.any.xpx | meta.tag.block.any.xpx)</scope>
-	<tabTrigger>sqlq</tabTrigger>
+	<scope>text.xpx - meta.tag.xpx</scope>
+	<tabTrigger>sql</tabTrigger>
 	<content>
 		<![CDATA[sql query="$1">
 	$0

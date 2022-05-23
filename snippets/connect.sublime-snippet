@@ -1,5 +1,5 @@
 <snippet>
-	<scope>text.html.xpx - (meta.tag.inline.any.xpx | meta.tag.block.any.xpx)</scope>
+	<scope>text.xpx - meta.tag.xpx</scope>
 	<tabTrigger>connect</tabTrigger>
 	<content>
 		<![CDATA[connect server="$1" base="$2" name="$3" pass="$4" $5/>$0]]>

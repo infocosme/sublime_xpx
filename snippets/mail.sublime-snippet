@@ -1,5 +1,5 @@
 <snippet>
-	<scope>text.html.xpx - (meta.tag.inline.any.xpx | meta.tag.block.any.xpx)</scope>
+	<scope>text.xpx - meta.tag.xpx</scope>
 	<tabTrigger>mail</tabTrigger>
 	<content>
 		<![CDATA[mail smtp="$1"
