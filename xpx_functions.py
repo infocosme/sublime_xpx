@@ -4,6 +4,12 @@ import os
 import sublime
 import sublime_plugin
 
+"""
+	Sur clic-droit à l'intérieur d'une balise "function exec" : 
+		Création dynamique d'une commande contextuelle nommée "Goto Definition [Nom de la fonction décrite dans exec]".
+	Dans un script contenant des function name :
+		Création dynamique d'un menu contextuel nommé "Show Function" et listant toutes les "function name" du script.
+"""
 
 def getListFunctionName(myview):
 	"""
@@ -29,15 +35,15 @@ class XpxContextMenuFindFunctionDefCommand(sublime_plugin.TextCommand):
 		# Récupération du nom de la fonction concernée.
 		pt = self.view.window_to_text((event["x"], event["y"]))
 		# Est-ce que nous sommes sur une balise function ?
-		if self.view.match_selector(pt,'meta.tag.block.any.xpx'):
+		if self.view.match_selector(pt,'meta.tag.function.xpx'):
 			# Lecture du début de la balise function.
 			ptfindfunction = self.view.expand_by_class(pt,sublime.CLASS_PUNCTUATION_START | sublime.CLASS_PUNCTUATION_END,"<>").begin()+1
-			if (self.view.substr(self.view.expand_by_class(ptfindfunction,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END)) == "function"):
-				ptfindexec = self.view.expand_by_class(ptfindfunction,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END).end()+3
-				if (self.view.substr(self.view.expand_by_class(ptfindexec,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END)) == "exec"):
-					ptfindname = self.view.expand_by_class(ptfindexec,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END).end()+3
-					myname = self.view.substr(self.view.expand_by_class(ptfindname,sublime.CLASS_WORD_START+sublime.CLASS_WORD_END,"\""))
-					return myname
+			#if (self.view.substr(self.view.expand_by_class(ptfindfunction,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END)) == "function"):
+			ptfindexec = self.view.expand_by_class(ptfindfunction,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END).end()+3
+			if (self.view.substr(self.view.expand_by_class(ptfindexec,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END)) == "exec"):
+				ptfindname = self.view.expand_by_class(ptfindexec,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END).end()+3
+				myname = self.view.substr(self.view.expand_by_class(ptfindname,sublime.CLASS_WORD_START+sublime.CLASS_WORD_END,"\""))
+				return myname
 		# Dans les autres cas, on annule l'option.
 		return None
 
@@ -96,7 +102,7 @@ class EventListener(sublime_plugin.EventListener):
 				Le sous-menu complète donc le sous-menu défini dans le package.
 			A chaque déclenchement, le sous menu contextuel est entièrement ré-écrit ce qui provoque son effacement le cas échéant.
 			"""
-			if view.match_selector(view.window_to_text((0,0)), "text.html.xpx"):
+			if view.match_selector(view.window_to_text((0,0)), "text.xpx"):
 				# Recherche d'éventuelles occurences.
 				maliste = getListFunctionName(view)
 				if (len(maliste)>0):

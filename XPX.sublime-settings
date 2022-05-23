@@ -2,7 +2,9 @@
 {
 	// Set to true to disable default completions.
 	"disable_default_completions": false,
-	"color_scheme": "Packages/XPX/XPX.tmTheme",
+	// Le choix par défaut du color-scheme défini le schéma des couleurs appliquées (évite de les redéfinir toutes).
+	// Ensuite, dans le package, on surcharge les définitions souhaitez avec un color-scheme de même nom.
+	"color_scheme": "Monokai.sublime-color-scheme",
 	"tab_size": 3,
 	"margin": 3,
 	"word_wrap": "false",

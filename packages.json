@@ -4,11 +4,11 @@
 		{
 			"name": "XPX",
 			"details": "https://github.com/infocosme/sublime_xpx",
-			"labels": ["auto-complete", "language syntax", "snippets"],
+			"labels": ["auto-complete", "language syntax", "auto-close", "snippets"],
 			"releases": [
 				{
 					"platforms": ["windows", "osx", "linux"],
-					"sublime_text": ">=3092",
+					"sublime_text": ">=4126",
 					"tags": true
 				}
 			]
