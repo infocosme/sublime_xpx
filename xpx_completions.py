@@ -1,6 +1,8 @@
 import html
 import html.entities
 import re
+import gc
+import time
 
 import sublime
 import sublime_plugin
@@ -150,10 +152,13 @@ def get_xpx_list_attributes(view, pt, tag, endpt):
     Lecture de tous les attributs du tag demandé du point pt au endpt.
     Si l'un des attributs est exec (function), renvoi également le nom de la fonction.
     """
-    #print("get_xpx_list_attributes")
+    #print("get_xpx_list_attributes", time.strftime("%H:%M:%S"))
     listAttrName = []
     execName = ""
+    # Début de la lecture des attributs.
     mypt = pt + len(tag)
+    #print("mypt:",mypt)
+    #print("endpt:",endpt)
     # Boucle sur toute la chaîne à la recherche des attribut="value".
     while (mypt<endpt):
         # Contrôle de fin de recherche.
@@ -163,29 +168,33 @@ def get_xpx_list_attributes(view, pt, tag, endpt):
         # Recherche du nom de l'attribut.
         # Recherche en avant du prochain signe de ponctuation.
         myPosPunctuation = view.find_by_class(mypt, True, sublime.CLASS_PUNCTUATION_START)
-        # Contrôle de fin de recherche.
-        mynext = view.substr(sublime.Region(myPosPunctuation, myPosPunctuation+1))
-        if ( mynext == '/' or mynext == '>'):
-            break
-        # recherche en arrière du début du mot.
-        myPosAttributeName = view.find_by_class(myPosPunctuation, False, sublime.CLASS_WORD_START)
-        # Lecture du nom de l'attribut.
-        myAttributeName = view.substr(sublime.Region(myPosAttributeName, myPosPunctuation)).strip()
-        listAttrName.append(myAttributeName)
-        # Recherche de la valeur de l'attribut.
-        mypt = myPosPunctuation
-        myregion = view.find('=', mypt)
-        mypt = myregion.begin()
-        myregion = view.find('"', mypt)
-        mypt = myregion.begin() + 1
-        # Recherche de la fin de la valeur de l'attribut enregistrée entre deux "".
-        myregion = view.find('"', mypt)
-        myPosPunctuation1 = myregion.end()
-        myAttributeValue = view.substr(sublime.Region(mypt, myPosPunctuation1 - 1)).strip()
-        if (myAttributeName == "exec"):
-            execName = myAttributeValue
-        # Poursuite de la recherche.
-        mypt = myPosPunctuation1 + 1
+        #print("myPosPunctuation:",myPosPunctuation)
+        if (myPosPunctuation<endpt):
+            # Contrôle de fin de recherche.
+            mynext = view.substr(sublime.Region(myPosPunctuation, myPosPunctuation+1))
+            if ( mynext == '/' or mynext == '>'):
+                break
+            # recherche en arrière du début du mot.
+            myPosAttributeName = view.find_by_class(myPosPunctuation, False, sublime.CLASS_WORD_START)
+            # Lecture du nom de l'attribut.
+            myAttributeName = view.substr(sublime.Region(myPosAttributeName, myPosPunctuation)).strip()
+            listAttrName.append(myAttributeName)
+            # Recherche de la valeur de l'attribut.
+            mypt = myPosPunctuation
+            myregion = view.find('=', mypt)
+            mypt = myregion.begin()
+            myregion = view.find('"', mypt)
+            mypt = myregion.begin() + 1
+            # Recherche de la fin de la valeur de l'attribut enregistrée entre deux "".
+            myregion = view.find('"', mypt)
+            myPosPunctuation1 = myregion.end()
+            myAttributeValue = view.substr(sublime.Region(mypt, myPosPunctuation1 - 1)).strip()
+            if (myAttributeName == "exec"):
+                execName = myAttributeValue
+            # Poursuite de la recherche.
+            mypt = myPosPunctuation1 + 1
+        else:
+            mypt = myPosPunctuation
     return listAttrName, execName
 
 
@@ -193,9 +202,9 @@ def get_xpx_tag_attributes(view, tag, region):
     """
     Returns a dictionary with attributes associated to tags
     """
-    #print("get_xpx_tag_attributes")
+    #print("get_xpx_tag_attributes", time.strftime("%H:%M:%S"))
     # Map tags to specific attributes applicable for that tag
-    tag_attr_dict = {
+    xpx_tag_attr_dict = {
         'cond': ['expr'],
         'connect': ['base', 'close', 'id', 'info', 'name', 'pass', 'port', 'server', 'socket', 'transaction'],
         'cookie' : ['dir', 'domain', 'name', 'samesite', 'ttl', 'value'],
@@ -221,58 +230,60 @@ def get_xpx_tag_attributes(view, tag, region):
         'xpath' : ['file', 'select', 'value'],
         'xproc': ['file', 'select', 'value']
     }
-    #print(view, end="")
-    #print(tag, end="")
-    #print(region)
+    #print("view:",view)
+    #print("tag:",tag,len(tag))
+    #print("region:",region)
     # Suppression systématique des attributs déjà positionné dans le tag.
     if (region is not None):
         myattributesalreadypresent = get_xpx_list_attributes(view, region.begin(), tag, region.end())
-        # Traitement spécifique pour le tag function exec
-        # Objectif : complétion des arguments du function name correspondant.
-        # à partir du nom de la fonction recherchée myresult[1].
-        if (tag == 'function'):
-            # exec en tant que membre de la liste des attributs ?
-            if "exec" in myattributesalreadypresent[0]:
-                #print("Recherche du prototype function ", end="")
-                # Recherche d'une entrée symbol correspondant au nom de la fonction.
-                mywindow = sublime.active_window()
-                # Recherche dans l'index projet (tous les fichiers du projet)
-                # Recherche dans les symbols définition.
-                # Recherche dans les symbols function.
-                mylocations=mywindow.symbol_locations(myattributesalreadypresent[1],sublime.SYMBOL_SOURCE_INDEX,sublime.SYMBOL_TYPE_DEFINITION,sublime.KIND_ID_FUNCTION)
-                if (len(mylocations)>0):
-                    # En cas de file trouvé, affichage de chacun des files trouvés (normalement un seul).
-                    for l in mylocations:
-                        content = None
-                        try:
-                            with codecs.open(l.path, 'r', encoding='utf-8') as file:
-                                content = file.read()
-                        except:
-                            pass
-                        if content:
-                            myfunctionview = mywindow.create_output_panel('myfunctionfile', unlisted=True)
-                            myfunctionview.settings().set("translate_tabs_to_spaces", False)
-                            myfunctionview.settings().set("auto_indent", False)
-                            myfunctionview.run_command('insert', {"characters": content})
-                            myfunctionview.assign_syntax("XPX.sublime-syntax")
-                            myfunctionpt = myfunctionview.text_point(l.row-1,l.col-1)
-                            myfunctionregion = myfunctionview.expand_by_class(myfunctionpt,sublime.CLASS_PUNCTUATION_START | sublime.CLASS_PUNCTUATION_END,"<>")
-                            myfunctionattributes = get_xpx_list_attributes(myfunctionview,myfunctionregion.begin(),'function',myfunctionregion.end())
-                            for a in myfunctionattributes[0]:
-                                if a not in tag_attr_dict["function"]:
-                                    tag_attr_dict["function"].append(a)
-                            mywindow.destroy_output_panel('myfunctionfile')
-        # Effacement de tous les attributs déjà présents sur le tag en cours.
-        for a in myattributesalreadypresent[0]:
-            if (a in tag_attr_dict[tag]):
-                tag_attr_dict[tag].remove(a)
-        # effacement du name dans la complétion si exec présent sur le tag en cours.
-        if ("exec" in myattributesalreadypresent[0]):
-            tag_attr_dict["function"].remove("name")
-        # effacement du exec dans la complétion si name présent sur le tag en cours.
-        if ("name" in myattributesalreadypresent[0]):
-            tag_attr_dict["function"].remove("exec")
-    return tag_attr_dict
+        #print("myattributesalreadypresent:",myattributesalreadypresent)
+        if (len(myattributesalreadypresent[0])>0):
+            # Traitement spécifique pour le tag function exec
+            # Objectif : complétion des arguments du function name correspondant.
+            # à partir du nom de la fonction recherchée myresult[1].
+            if (tag == 'function'):
+                # exec en tant que membre de la liste des attributs ?
+                if "exec" in myattributesalreadypresent[0]:
+                    #print("Recherche du prototype function ", end="")
+                    # Recherche d'une entrée symbol correspondant au nom de la fonction.
+                    mywindow = sublime.active_window()
+                    # Recherche dans l'index projet (tous les fichiers du projet)
+                    # Recherche dans les symbols définition.
+                    # Recherche dans les symbols function.
+                    mylocations=mywindow.symbol_locations(myattributesalreadypresent[1],sublime.SYMBOL_SOURCE_INDEX,sublime.SYMBOL_TYPE_DEFINITION,sublime.KIND_ID_FUNCTION)
+                    if (len(mylocations)>0):
+                        # En cas de file trouvé, affichage de chacun des files trouvés (normalement un seul).
+                        for l in mylocations:
+                            content = None
+                            try:
+                                with codecs.open(l.path, 'r', encoding='utf-8') as file:
+                                    content = file.read()
+                            except:
+                                pass
+                            if content:
+                                myfunctionview = mywindow.create_output_panel('myfunctionfile', unlisted=True)
+                                myfunctionview.settings().set("translate_tabs_to_spaces", False)
+                                myfunctionview.settings().set("auto_indent", False)
+                                myfunctionview.run_command('insert', {"characters": content})
+                                myfunctionview.assign_syntax("XPX.sublime-syntax")
+                                myfunctionpt = myfunctionview.text_point(l.row-1,l.col-1)
+                                myfunctionregion = myfunctionview.expand_by_class(myfunctionpt,sublime.CLASS_PUNCTUATION_START | sublime.CLASS_PUNCTUATION_END,"<>")
+                                myfunctionattributes = get_xpx_list_attributes(myfunctionview,myfunctionregion.begin(),'function',myfunctionregion.end())
+                                for a in myfunctionattributes[0]:
+                                    if a not in xpx_tag_attr_dict["function"]:
+                                        xpx_tag_attr_dict["function"].append(a)
+                                mywindow.destroy_output_panel('myfunctionfile')
+            # Effacement de tous les attributs déjà présents sur le tag en cours.
+            for a in myattributesalreadypresent[0]:
+                if (a in xpx_tag_attr_dict[tag]):
+                    xpx_tag_attr_dict[tag].remove(a)
+            # effacement du name dans la complétion si exec présent sur le tag en cours.
+            if ("exec" in myattributesalreadypresent[0]):
+                xpx_tag_attr_dict["function"].remove("name")
+            # effacement du exec dans la complétion si name présent sur le tag en cours.
+            if ("name" in myattributesalreadypresent[0]):
+                xpx_tag_attr_dict["function"].remove("exec")
+    return xpx_tag_attr_dict
 
 
 def get_xpx_attribute_values(myAttributeName):
@@ -348,6 +359,15 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         return get_xpx_entity_completions()
 
     @cached_property
+    def tag_attributes(self):
+        """
+        Déclenchement : Un tag vient d'être saisi, un espace déclenche la proposition des attributs possibles.
+        Objectif :      Renvoi d'un dictionnaire des possibles : tous les tags avec leurs attributs possibles.
+        """
+        #print("tag_attributes")
+        return get_xpx_tag_attributes(view=None, tag='', region=None)
+
+    @cached_property
     def tag_abbreviations(self):
         #print("tag_abbreviations")
         return get_xpx_tag_completions(inside_tag=False)
@@ -387,7 +407,12 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         """
         Fonction générale de complétion : tout part de cette fonction.
         """
-        #print("on_query_completions")
+        #print("on_query_completions", time.strftime("%H:%M:%S"))
+        #print(view)
+        #print(prefix)
+        #print(locations)
+        #return None
+
         # Autorisé uniquement sur un source XPX.
         if not view.match_selector(locations[0], "text.xpx"):
             return None
@@ -420,6 +445,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         # Le scope doit être balise XPX sans propriété avec valeur : donc normalement emplacement d'un nouvel attribut.
         # Le caret précédent doit obligatoirement être un séparateur entre la balise et le nom de l'attribut.
         # Autorisé sur un tag XPX mais pas dans un attribut : uniquement en dehors d'un attribut.
+        #print("test attribute completion")
         if view.match_selector(locations[0], "meta.tag.xpx - meta.attribute-with-value.xpx"):
             if ch in ' \f\n\t':
                 return self.attribute_completions(view, locations[0], prefix)
@@ -492,9 +518,13 @@ class XpxTagCompletions(sublime_plugin.EventListener):
 
     def attribute_completions(self, view, pt, prefix):
         """
-        Recherche des attributs possibles pour le tag courant.
+        Déclenchement : Un premier caractère est saisi dans un scope attribut.
+        Objectif :      Renvoi d'une CompletionList contenant les attributs possibles pour le tag en cours.
         """
         #print("attribute_completions")
+        #print(view)
+        #print(pt)
+        #print("prefix:",prefix,len(prefix))
         # Complément avec un éventuel prototype de fonction.
         # Contrôle si la complétion a été demandée (view, pt) sur un function exec dont la valeur existe.
         # Recherche du prototype correspondant parmi les symbol.
@@ -502,10 +532,12 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         
         # Lecture de la région tag dans laquelle la complétion est demandée.
         myregiontag = view.expand_by_class(pt,sublime.CLASS_PUNCTUATION_START | sublime.CLASS_PUNCTUATION_END,"<>")
+        #print("region:",myregiontag)
         # Lecture du début de la région.
         ptfindtag = myregiontag.begin()+1
         # Lecture du nom du tag de la région courante.
         tag = view.substr(view.word(ptfindtag))
+        #print("tag:",tag,len(tag))
         # La liste de complétion est filtrée sur les entrées attributes calculées en haut.
         # Suppression du test sur attributes boolean.
         #            completion=f'{attr}{suffix}' if attr in boolean_attributes else f'{attr}="$1"{suffix}',
@@ -516,7 +548,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
                 sublime.CompletionItem(
                     trigger=attr,
                     annotation='xpx',
-                    completion=f'{attr}="$1"',
+                    completion=f'{attr}="$1"$0',
                     completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
                     kind=KIND_ATTRIBUTE_SNIPPET
                 )
@@ -542,11 +574,23 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         myTagName = view.substr(view.expand_by_class(ptfindtag,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END))
         #print(myTagName)
 
-        #if (myTagName == "function" and myAttributeName == "exec"):
+        if (myTagName == "function" and myAttributeName == "exec"):
             #print("Recherche des function name disponibles")
             #print(view.indexed_symbol_regions())
             #print(view.window().project_data())
             #print(view.window().folders())
+            #print(len(gc.get_objects()))
+            counter = {}
+            for obj in gc.get_objects():
+                #print(type(obj).__name__)
+                #if isinstance(obj, list):
+                #    if ("xpxForms.blocChamps" in obj):
+                #    print(obj)
+                #    print()
+                if type(obj).__name__ not in counter:
+                    counter[type(obj).__name__] = 0
+                counter[type(obj).__name__] += 1
+            print(counter)
 
         # got the tag,attribute, now find all values that match
         if get_xpx_attribute_values(myAttributeName):
