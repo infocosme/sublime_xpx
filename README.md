@@ -30,15 +30,34 @@ P. Milon
 Utiliser le plug-in "Package Control" pour installer le plug-in XPX.
 Dans la rubrique "install Package", chercher le plug-in nommé "XPX".
 ## Personnalisation
-### Thème par défaut
-Le thème XPX livré par défaut est une surcharge du thème Monokai personnalisé avec les régions du XPX sublime-syntax.
+Les paramètres de personnalisation sont enregistrés dans "/AppdData/Roaming/Sublime Text/Packages"
+Ce dossier est accessible via la commande "Préférences / Browse Packages..."
+Ne pas confondre le thème (les boutons, l'interface claire ou foncée, la sidebar, ...) avec le color-scheme (la coloration
+syntaxique d'un fichier source)
+### Color Scheme
+Un color-scheme n'est pas lié à un package en particulier. Il peut être défini pour faire varier la coloration
+syntaxique pour chaque syntaxe utilisée dans le projet.
+Un exemple de .sublime-color-scheme est livré par défaut : Monokai.sublime-color-scheme.Exemple
+Cet exemple contient des exemples de personnalisation de scope XPX.
+Les choix de color-scheme sont enregistrés dans "/AppdData/Roaming/Sublime Text/Packages/User"
+Les color scheme sont appliqués par ordre de priorité (de la plus faible à la plus grande) :
+* "Preferences / Settings" (Valable en l'absence de préférence définie sur la syntaxe du fichier ouvert) : 
+	- Editer le fichier de configuration des préférences du user.
+	- Le fichier est enregistré dans "/AppdData/Roaming/Sublime Text/Packages/User/Preferences.sublime-settings"
+* "Preferences / Select Color Scheme..." : Permet de choisir dans une liste le color-scheme du user.
+* "Preferences / Setting - Syntax Specific" (Prioritaire sur les préférences globales du user) : 
+	- Editer le fichier de configuration pour un syntaxe en particulier
+	- Le fichier est enregistré dans "/AppdData/Roaming/Sublime Text/Packages/User/[syntax].sublime-settings"
+	- à définir à partir d'un fichier ouvert dans l'extension ciblée
+* "Preferences / Customize Color Scheme..." :
+	- Editer les rules du color-scheme en cours.
 ### Les régions XPX
 L'analyse syntaxique se déclenche après celle du HTML standard (HTML, javascript, CSS).
 La balise <noparse> permet d'interrompre l'analyse syntaxique XPX tout en préservant celle du HTML standard (HTML, javascript, CSS).
 Les variables XPX sont identifiées quelque soit leur emplacement (sauf dans une région <noparse>).
 Liste des régions disponibles :
 * text.xpx : La région principale
-* entity.name.tag.block.xpx, entity.name.tag.inline.xpx, entity.name.tag.function.xpx : nom du tag XPX
+* meta.tag.xpx : scope définissant le nom d'un tag XPX
 * meta.tag.block.xpx : région constituée de toutes les balises XPX block.
 * meta.tag.inline.xpx : région constituée de toutes les balises XPX inline.
 * meta.tag.function.xpx : région complète constituée de tout le block <function>.

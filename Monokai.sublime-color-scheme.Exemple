@@ -1,0 +1,90 @@
+// Documentation at https://www.sublimetext.com/docs/color_schemes.html
+{
+    "name": "XPX Default Color Scheme",
+    "variables":
+    {
+        "tag": "#FF9500",
+        "guillemet": "#D1932D",
+        "attribute": "#A6E22E",
+        "value": "#E6DB74",
+        "variable": "#FFD800",
+        "embedded": "#FFC6C2"
+    },
+    "globals":
+    {
+        "background": "var(black)",
+    },
+    "rules":
+    [
+        {
+            "name": "xpx tag block",
+            "scope": "entity.name.tag.block.xpx",
+            "foreground": "var(tag)"
+        },
+        {
+            "name": "xpx tag inline",
+            "scope": "entity.name.tag.inline.xpx",
+            "foreground": "var(tag)"
+        },
+        {
+            "name": "xpx tag function",
+            "scope": "entity.name.tag.function.xpx",
+            "foreground": "var(tag)"
+        },
+        {
+            "name": "xpx attribute name query",
+            "scope": "entity.other.attribute-name.query.xpx",
+            "foreground": "var(attribute)"
+        },
+        {
+            "name": "xpx attribute name",
+            "scope": "entity.other.attribute-name.xpx",
+            "foreground": "var(attribute)"
+        },
+        {
+            "name": "guillemet value begin",
+            "scope": "punctuation.definition.string.begin.xpx",
+            "foreground": "var(guillemet)"
+        },
+        {
+            "name": "xpx attribute value",
+            "scope": "entity.other.attribute-value.xpx",
+            "foreground": "var(value)"
+        },
+        {
+            "name": "xpx attribute function name",
+            "scope": "entity.name.function.xpx",
+            "foreground": "var(value)"
+        },
+        {
+            "name": "guillemet value end",
+            "scope": "punctuation.definition.string.end.xpx",
+            "foreground": "var(guillemet)"
+        },
+        {
+            "name": "xpx variable",
+            "scope": "variable.other.xpx",
+            "foreground": "var(variable)"
+        },
+        {
+            "name": "xpx variable imbriquee",
+            "scope": "variable.other.xpx.embedded",
+            "foreground": "var(embedded)"
+        },
+        {
+            "name": "sql query value by default",
+            "scope": "text.xpx source.sql",
+            "foreground": "#7F92FF"
+        },
+        {
+            "name": "sql query value keyword",
+            "scope": "text.xpx source.sql keyword",
+            "foreground": "#7F92FF"
+        },
+        {
+            "name": "sql query value database-name",
+            "scope": "text.xpx source.sql constant.other",
+            "foreground": "#7F92FF"
+        }
+    ]
+}

@@ -574,6 +574,10 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         myTagName = view.substr(view.expand_by_class(ptfindtag,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END))
         #print(myTagName)
 
+        """
+        # Tentative de completion du function exec avec la liste des fonctions du projet.
+        # A priori, impossible selon les auteurs de ST.
+        # Pas de fonction API disponible pour parcourir les symbols XPX de type function.
         if (myTagName == "function" and myAttributeName == "exec"):
             #print("Recherche des function name disponibles")
             #print(view.indexed_symbol_regions())
@@ -591,6 +595,7 @@ class XpxTagCompletions(sublime_plugin.EventListener):
                     counter[type(obj).__name__] = 0
                 counter[type(obj).__name__] += 1
             print(counter)
+        """
 
         # got the tag,attribute, now find all values that match
         if get_xpx_attribute_values(myAttributeName):

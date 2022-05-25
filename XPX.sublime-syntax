@@ -40,11 +40,24 @@ contexts:
       # La page xpx est avant tout analysé en HTML (avec CSS et JS) classique.
       push: Packages/HTML/HTML.sublime-syntax
       with_prototype:
+        # Suspendre l'analyse syntaxique XPX durant un commentaire HTML.
+        - include: tag-xpx-comment
         # Ajouter ensuite les régions XPX en sus des régions HTML.
         - include: tag-xpx
         # Permettre la reconnaissance des variables XPX dans le HTML.
         - match: '\$'
           push: variable-xpx
+
+###[ NO XPX IN COMMENT TAGS ]###############################################
+
+  tag-xpx-comment:
+    - match: <!--
+      scope: punctuation.definition.comment.begin.html
+      push:
+        - meta_scope: comment.block.html
+        - match: '-->'
+          scope: punctuation.definition.comment.end.html
+          pop: true
 
 ###[ XPX TAGS ]##############################################################
 
@@ -122,7 +135,7 @@ contexts:
 
   tag-xpx-query-attribute-meta:
     - meta_include_prototype: false
-    - meta_scope: meta.attribute-with-value.query.xpx
+    - meta_scope: meta.attribute-with-value.xpx meta.attribute-with-value.query.xpx
     - include: immediately-pop
 
   tag-xpx-query-attribute-assignment:
@@ -133,17 +146,18 @@ contexts:
 
   tag-xpx-query-attribute-value:
     - match: \"
-      scope: meta.string.html string.quoted.double.html punctuation.definition.string.begin.xpx
+      scope: punctuation.definition.string.begin.xpx
       push: Packages/SQL/SQL.sublime-syntax
       with_prototype:
+        # Eliminer tous les guillements échappés.
+        - match: '\\"'
+        - match: '"'
+          scope: punctuation.definition.string.end.xpx
+          pop: true
         - match: '\$'
           push: variable-xpx
-        - match: \"
-          pop: 1
-      escape: \"
-      escape_captures:
-        0: meta.string.html string.quoted.double.html punctuation.definition.string.end.xpx
-    - include: else-pop
+    - match: ''
+      pop: true
 
 ###[ OTHER XPX ATTRIBUTES ]########################################################
 
