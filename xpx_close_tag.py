@@ -16,6 +16,7 @@
 
     :copyright: (c) 2017 by Pascal MILON <pmilon@infocosme.com>
 """
+import time
 
 import sublime
 import sublime_plugin
@@ -68,7 +69,7 @@ def get_xpx_list_attributes(view, pt, tag, endpt):
 
 class XpxCloseTagCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        #print('run xpx_close_tag:')
+        #print("xpx_close_tag", time.strftime("%H:%M:%S"))
 
         cursorPosition = self.view.sel()[0].begin()
         # print('cursorPosition:', cursorPosition)
@@ -128,11 +129,12 @@ class XpxCloseTagCommand(sublime_plugin.TextCommand):
             # 07/10/2019 : 'string.quoted.double.html' (value d'un attribut HTML)
             # 23/05/2022 : 'meta.attribute-with-value.xpx' (value d'un attribut XPX)
             # 23/05/2022 : Suppression de l'utilisation de la liste statique des tags HTM inline au profit du scope.
+            # 31/05/2022 : Correction bug scope meta.tag.inline pour input html : Utilisation meta.tag.inline en remplacement des deux meta.tag.inline... précédents.
             #print(self.view.scope_name(myRegion.end()))
             elif bonPourLifo \
-            and not 'meta.tag.inline.any.html' in self.view.scope_name(myRegion.end()) \
-            and not 'meta.tag.inline.xpx' in self.view.scope_name(myRegion.end()) \
+            and not 'meta.tag.inline' in self.view.scope_name(myRegion.end()) \
             and not 'meta.attribute-with-value.xpx' in self.view.scope_name(myRegion.end()) \
+            and not 'comment.block.html' in self.view.scope_name(myRegion.end()) \
             and not 'string.quoted.double.html' in self.view.scope_name(myRegion.end()) \
             and not ('meta.tag.xpx' in self.view.scope_name(myRegion.end()) and 'meta.tag.noparse.xpx' in self.view.scope_name(myRegion.end())):
                 # Préserver le début de la balise pour déterminer si balise ouverture ou fermeture.

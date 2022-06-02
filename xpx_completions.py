@@ -213,7 +213,7 @@ def get_xpx_tag_attributes(view, tag, region):
         'debug' : ['mode', 'printparam', 'suffix'],
         'else' : ['expr'],
         'file' : ['close', 'content', 'delete', 'eol', 'exist', 'name', 'mode', 'model', 'open', 'path', 'read', 'write', 'xpx'],
-        'function' : ['name', 'exec'],
+        'function' : ['name', 'exec', 'namespace'],
         'get' : ['format', 'name', 'option', 'tag', 'token', 'value'],
         'http' : ['content', 'get', 'headers', 'name', 'port', 'timeout'],
         'include' : ['file', 'option'],
@@ -596,8 +596,18 @@ class XpxTagCompletions(sublime_plugin.EventListener):
                 counter[type(obj).__name__] += 1
             print(counter)
         """
-
-        # got the tag,attribute, now find all values that match
+        """
+        view.window().run_command("hide_panel")
+        view.window().run_command("show_panel", { "panel": "find_in_files", "where": "<project>" })
+        #view.window().run_command("find_all")
+        """
+        """
+        for region, symbol_name in view.symbols():
+            print(symbol_name, end=":")
+        print()
+        """
+        #print(view.symbols())
+        # got the classic tag,attribute, now find all values that match
         if get_xpx_attribute_values(myAttributeName):
             return sublime.CompletionList(
                 [
@@ -610,6 +620,6 @@ class XpxTagCompletions(sublime_plugin.EventListener):
                     )
                     for val in get_xpx_attribute_values(myAttributeName).get(myTagName, [])
                 ],
-                sublime.INHIBIT_WORD_COMPLETIONS
+                sublime.INHIBIT_WORD_COMPLETIONS + sublime.INHIBIT_EXPLICIT_COMPLETIONS
             )
         return None
