@@ -35,7 +35,8 @@ class XpxContextMenuFindFunctionDefCommand(sublime_plugin.TextCommand):
 		# Récupération du nom de la fonction concernée.
 		pt = self.view.window_to_text((event["x"], event["y"]))
 		# Est-ce que nous sommes sur une balise function ?
-		if self.view.match_selector(pt,'meta.tag.function.begin.xpx'):
+		# 22/06/2022 : Correction bug : remplacement de meta.tag.function.begin.xpx par meta.tag.function.xpx.
+		if self.view.match_selector(pt,'meta.tag.function.xpx'):
 			# Lecture du début de la balise function.
 			ptfindfunction = self.view.expand_by_class(pt,sublime.CLASS_PUNCTUATION_START | sublime.CLASS_PUNCTUATION_END,"<>").begin()+1
 			#if (self.view.substr(self.view.expand_by_class(ptfindfunction,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END)) == "function"):
