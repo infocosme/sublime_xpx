@@ -90,18 +90,43 @@ def get_xpx_tag_completions(inside_tag=True):
     """
     Generate a default completion list for XPX
     """
+    
+    # Suggestions de tags block : possibilité d'indiquer un attribut par défaut.
     normal_tags = (
-        'cond','csv','debug',
-        'function',
-        'scope','setarea','sql','while'
+        ('cond', ' expr=\"$1\"'),
+        ('csv', ''),
+        ('debug', ''),
+        ('function', ' name=\"$1\"'),
+        ('scope', ''),
+        ('setarea', ''),
+        ('sql', ' query=\"$1\"'),
+        ('while', ' expr=\"$1\"'),
     )
+    # Suggestions de tags inline : possibilité d'indiquer un attribut par défaut.
     inline_tags = (
-        'connect','cookie','create','debug',
-        'else','file','function','get','http','include','mail','pdf','pict',
-        'set','system','wait','xpath','xproc'
+        ('connect', ' server=\"$1\" base=\"$2\" name=\"$3\" pass=\"$4\"'),
+        ('cookie', ' name=\"$1\"'),
+        ('create', ' dir=\"$1\"'),
+        ('debug', ''),
+        ('dir', ''),
+        ('else', ''),
+        ('file', ''),
+        ('function', ' exec=\"$1\" /'),
+        ('get', ''),
+        ('get', ' value=\"$1\"'),
+        ('http', ' get=\"https://$1\"'),
+        ('include', ' file=\"$1\"'),
+        ('mail', ' from=\"$1\" to=\"$2\"'),
+        ('pdf', ''),
+        ('pict', ''),
+        ('set', ''),
+        ('system', ' exec=\"$1\"'),
+        ('wait', ' value=\"$1\"'),
+        ('xpath', ''),
+        ('xproc', ''),
     )
     snippet_tags = (
-        ('file close', 'file close=\"$1\" />$0'),
+        ('file close', 'file close=\"$1\">$0'),
     )
 
     tag_begin = '' if inside_tag else '<'
@@ -113,23 +138,23 @@ def get_xpx_tag_completions(inside_tag=True):
                 sublime.CompletionItem(
                     trigger=tag,
                     annotation='block xpx',
-                    completion=f'{tag_begin}{tag}$1>$0</{tag}>',
+                    completion=f'{tag_begin}{tag}{attributebydefault}>$0</{tag}>',
                     completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
                     kind=KIND_TAG_MARKUP,
-                    details=f'Expands to <code>&lt;{tag}&gt;$0&lt;/{tag}&gt;</code>'
+                    details=f'Expands to <code>&lt;{tag}{attributebydefault}&gt;&lt;/{tag}&gt;</code>'
                 )
-                for tag in normal_tags
+                for tag, attributebydefault in normal_tags
             ),
             *(
                 sublime.CompletionItem(
                     trigger=tag,
                     annotation='inline xpx',
-                    completion=f'{tag_begin}{tag}$1/>$0',
+                    completion=f'{tag_begin}{tag}{attributebydefault}>$0',
                     completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
                     kind=KIND_TAG_MARKUP,
-                    details=f'Expands to <code>&lt;{tag}/&gt;</code>'
+                    details=f'Expands to <code>&lt;{tag}{attributebydefault}&gt;</code>'
                 )
-                for tag in inline_tags
+                for tag, attributebydefault in inline_tags
             ),
             *(
                 sublime.CompletionItem(
@@ -211,9 +236,10 @@ def get_xpx_tag_attributes(view, tag, region):
         'create' : ['dir'],
         'csv' : ['file', 'name', 'sep', 'value'],
         'debug' : ['mode', 'printparam', 'suffix'],
+        'dir' : ['create', 'list', 'name'],
         'else' : ['expr'],
         'file' : ['close', 'content', 'delete', 'eol', 'exist', 'name', 'mode', 'model', 'open', 'path', 'read', 'write', 'xpx'],
-        'function' : ['name', 'exec', 'namespace'],
+        'function' : ['name', 'exec'],
         'get' : ['format', 'name', 'option', 'tag', 'token', 'value'],
         'http' : ['content', 'get', 'headers', 'name', 'port', 'timeout'],
         'include' : ['file', 'option'],
@@ -289,7 +315,7 @@ def get_xpx_tag_attributes(view, tag, region):
 def get_xpx_attribute_values(myAttributeName):
     """
     Fonction créée pour XPX.
-    Returns a dictionary with values accociated to attributes.
+    Returns a dictionary with values associated to attributes.
     """
     #print("get_xpx_attribute_values")
     # Map attributes to specific values applicable for that attribute
