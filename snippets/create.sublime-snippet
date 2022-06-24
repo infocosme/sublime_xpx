@@ -2,6 +2,6 @@
 	<scope>text.xpx - meta.tag.xpx</scope>
 	<tabTrigger>create</tabTrigger>
 	<content>
-		<![CDATA[create dir="$1" />$0]]>
+		<![CDATA[create dir="$1">$0]]>
 	</content>
 </snippet>

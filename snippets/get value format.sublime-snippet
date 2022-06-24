@@ -2,6 +2,6 @@
 	<scope>text.xpx - meta.tag.xpx</scope>
 	<tabTrigger>getvf</tabTrigger>
 	<content>
-		<![CDATA[get value="$1" format="$2" />$0]]>
+		<![CDATA[get value="$1" format="$2">$0]]>
 	</content>
 </snippet>

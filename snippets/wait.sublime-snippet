@@ -2,6 +2,6 @@
 	<scope>text.xpx - meta.tag.xpx</scope>
 	<tabTrigger>wait</tabTrigger>
 	<content>
-		<![CDATA[wait value="$1" />$0]]>
+		<![CDATA[wait value="$1">$0]]>
 	</content>
 </snippet>

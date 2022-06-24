@@ -2,6 +2,6 @@
 	<scope>text.xpx - meta.tag.xpx</scope>
 	<tabTrigger>setd0</tabTrigger>
 	<content>
-		<![CDATA[set global="phcdebug" value="0" />$0]]>
+		<![CDATA[set global="phcdebug" value="0">$0]]>
 	</content>
 </snippet>

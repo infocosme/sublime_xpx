@@ -2,6 +2,6 @@
 	<scope>text.xpx - meta.tag.xpx</scope>
 	<tabTrigger>functione</tabTrigger>
 	<content>
-		<![CDATA[function exec="$1" $2 />$0]]>
+		<![CDATA[function exec="$1" $2/>$0]]>
 	</content>
 </snippet>

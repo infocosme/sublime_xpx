@@ -2,6 +2,6 @@
 	<scope>text.xpx - meta.tag.xpx</scope>
 	<tabTrigger>include</tabTrigger>
 	<content>
-		<![CDATA[include file="$1" />]]>
+		<![CDATA[include file="$1">]]>
 	</content>
 </snippet>

@@ -2,6 +2,6 @@
 	<scope>text.xpx - meta.tag.xpx</scope>
 	<tabTrigger>connect</tabTrigger>
 	<content>
-		<![CDATA[connect server="$1" base="$2" name="$3" pass="$4" $5/>$0]]>
+		<![CDATA[connect server="$1" base="$2" name="$3" pass="$4" $5>$0]]>
 	</content>
 </snippet>

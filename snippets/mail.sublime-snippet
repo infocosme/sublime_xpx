@@ -6,6 +6,6 @@
 		from="$2"
 		to="$3"
 		subject="$4"
-		type="$5" />]]>
+		type="$5">]]>
 	</content>
 </snippet>
