@@ -229,8 +229,9 @@ def get_xpx_tag_attributes(view, tag, region):
     """
     #print("get_xpx_tag_attributes", time.strftime("%H:%M:%S"))
     # Map tags to specific attributes applicable for that tag
+    # 22/08/2022 : ajout attribut exist au tag cond et attribut srcparam au tag pict.
     xpx_tag_attr_dict = {
-        'cond': ['expr'],
+        'cond': ['expr', 'exist'],
         'connect': ['base', 'close', 'id', 'info', 'name', 'pass', 'port', 'server', 'socket', 'transaction'],
         'cookie' : ['dir', 'domain', 'name', 'samesite', 'ttl', 'value'],
         'create' : ['dir'],
@@ -246,7 +247,7 @@ def get_xpx_tag_attributes(view, tag, region):
         'mail' : ['cc', 'cci', 'charset', 'file', 'from', 'headers', 'join', 'msg', 'reply', 'smtp', 'subject', 'to', 'type'],
         'noparse' : [],
         'pdf' : ['addpage', 'align', 'bgcolor', 'border', 'calc', 'close', 'color', 'file', 'font', 'frame', 'gettext', 'getx', 'gety', 'href', 'leading', 'line', 'mode', 'name', 'padding', 'pagesize', 'path', 'rect', 'rotate', 'round', 'size', 'style', 'text'],
-        'pict' : ['border', 'calc', 'close', 'color', 'content', 'copy', 'dest', 'fill', 'font', 'geth', 'getw', 'height', 'name', 'path', 'position', 'rect', 'rotate', 'size', 'text', 'transparency', 'width', 'x', 'y'],
+        'pict' : ['border', 'calc', 'close', 'color', 'content', 'copy', 'dest', 'fill', 'font', 'geth', 'getw', 'height', 'name', 'path', 'position', 'rect', 'rotate', 'size', 'srcparam', 'text', 'transparency', 'width', 'x', 'y'],
         'scope' : ['name'],
         'set' : ['bit', 'bitoff', 'biton', 'by', 'charset', 'chartohexa', 'datetime', 'decode64', 'decrypt', 'encode64', 'encrypt', 'expr', 'format', 'global', 'hash', 'hex2bin', 'hexatochar', 'hmac', 'html2text', 'keycode', 'lang', 'len', 'local', 'lowcase', 'ltrim', 'money', 'name', 'noaccent', 'rand', 'replace', 'return', 'rtrim', 'session', 'strcode', 'strdecode', 'strescape', 'svg2pdf', 'trim', 'upcase', 'urlcode', 'value', 'xmlcode'],
         'setarea' : ['name', 'option'],
