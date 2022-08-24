@@ -125,51 +125,75 @@ def get_xpx_tag_completions(inside_tag=True):
         ('xpath', ''),
         ('xproc', ''),
     )
-    snippet_tags = (
-        ('file close', 'file close=\"$1\">$0'),
-    )
 
     tag_begin = '' if inside_tag else '<'
 
+    # 22/08/2022 : Prise en compte d'une nouvelle option du XPX settings.
+    # self closing or not for XPX tags.
+    settings = sublime.load_settings('XPX.sublime-settings')
+    #print("enable_self_closing_xpx_tags: ",settings.get('enable_self_closing_xpx_tags'))
+
     # Ajout de l'expand inline (le deuxième).
-    return sublime.CompletionList(
-        [
-            *(
-                sublime.CompletionItem(
-                    trigger=tag,
-                    annotation='block xpx',
-                    completion=f'{tag_begin}{tag}{attributebydefault}>$0</{tag}>',
-                    completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
-                    kind=KIND_TAG_MARKUP,
-                    details=f'Expands to <code>&lt;{tag}{attributebydefault}&gt;&lt;/{tag}&gt;</code>'
+    # 22/08/2022 : Deux possibilités de return avec ou sans self-closing.
+    # 22/08/2022 : Suppression du cas snippet jugé obsolète...
+    # si option définie alors true or false. Si option non définie alors None (NoneType).
+    # Dans le cas d'un test if, les valeurs false et None donneront false toutes les deux.
+    if settings.get('enable_self_closing_xpx_tags'):
+        return sublime.CompletionList(
+            [
+                *(
+                    sublime.CompletionItem(
+                        trigger=tag,
+                        annotation='block xpx',
+                        completion=f'{tag_begin}{tag}{attributebydefault}>$0</{tag}>',
+                        completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
+                        kind=KIND_TAG_MARKUP,
+                        details=f'Expands to <code>&lt;{tag}{attributebydefault}&gt;&lt;/{tag}&gt;</code>'
+                    )
+                    for tag, attributebydefault in normal_tags
+                ),
+                *(
+                    sublime.CompletionItem(
+                        trigger=tag,
+                        annotation='inline xpx',
+                        completion=f'{tag_begin}{tag}{attributebydefault}$0 />',
+                        completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
+                        kind=KIND_TAG_MARKUP,
+                        details=f'Expands to <code>&lt;{tag}{attributebydefault}&gt;</code>'
+                    )
+                    for tag, attributebydefault in inline_tags
                 )
-                for tag, attributebydefault in normal_tags
-            ),
-            *(
-                sublime.CompletionItem(
-                    trigger=tag,
-                    annotation='inline xpx',
-                    completion=f'{tag_begin}{tag}{attributebydefault}>$0',
-                    completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
-                    kind=KIND_TAG_MARKUP,
-                    details=f'Expands to <code>&lt;{tag}{attributebydefault}&gt;</code>'
+            ],
+            sublime.INHIBIT_WORD_COMPLETIONS
+        )
+    else:
+        return sublime.CompletionList(
+            [
+                *(
+                    sublime.CompletionItem(
+                        trigger=tag,
+                        annotation='block xpx',
+                        completion=f'{tag_begin}{tag}{attributebydefault}>$0</{tag}>',
+                        completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
+                        kind=KIND_TAG_MARKUP,
+                        details=f'Expands to <code>&lt;{tag}{attributebydefault}&gt;&lt;/{tag}&gt;</code>'
+                    )
+                    for tag, attributebydefault in normal_tags
+                ),
+                *(
+                    sublime.CompletionItem(
+                        trigger=tag,
+                        annotation='inline xpx',
+                        completion=f'{tag_begin}{tag}{attributebydefault}$0>',
+                        completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
+                        kind=KIND_TAG_MARKUP,
+                        details=f'Expands to <code>&lt;{tag}{attributebydefault}&gt;</code>'
+                    )
+                    for tag, attributebydefault in inline_tags
                 )
-                for tag, attributebydefault in inline_tags
-            ),
-            *(
-                sublime.CompletionItem(
-                    trigger=tag,
-                    annotation='snippet xpx',
-                    completion=f'{tag_begin}{completion}',
-                    completion_format=sublime.COMPLETION_FORMAT_SNIPPET,
-                    kind=KIND_TAG_SNIPPET,
-                    details=f'Expands to <code>&lt;{html.escape(completion)}</code>'
-                )
-                for tag, completion in snippet_tags
-            )
-        ],
-        sublime.INHIBIT_WORD_COMPLETIONS
-    )
+            ],
+            sublime.INHIBIT_WORD_COMPLETIONS
+        )
 
 
 def get_xpx_list_attributes(view, pt, tag, endpt):
