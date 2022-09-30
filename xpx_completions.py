@@ -95,7 +95,6 @@ def get_xpx_tag_completions(inside_tag=True):
     normal_tags = (
         ('cond', ' expr=\"$1\"'),
         ('csv', ''),
-        ('debug', ''),
         ('function', ' name=\"$1\"'),
         ('scope', ''),
         ('setarea', ''),
@@ -260,7 +259,7 @@ def get_xpx_tag_attributes(view, tag, region):
         'cookie' : ['dir', 'domain', 'name', 'samesite', 'ttl', 'value'],
         'create' : ['dir'],
         'csv' : ['file', 'name', 'sep', 'value'],
-        'debug' : ['mode', 'printparam', 'suffix'],
+        'debug' : ['dir', 'mode', 'printparam', 'suffix'],
         'dir' : ['create', 'list', 'name'],
         'else' : ['expr'],
         'file' : ['close', 'content', 'delete', 'eol', 'exist', 'name', 'mode', 'model', 'open', 'path', 'read', 'write', 'xpx'],
@@ -372,6 +371,9 @@ def get_xpx_attribute_values(myAttributeName):
         },
         'position' : {
             'pict': ['TL', 'TM', 'TR', 'ML', 'MM', 'MR', 'BL', 'BM', 'BR']
+        },
+        'printparam' : {
+            'debug': ['$phcparamcount$']
         },
         'samesite' : {
             'cookie': ['Lax', 'Strict']
