@@ -19,11 +19,6 @@ variables:
       cookie|connect|create|debug|else|file|get|http|include|mail|pdf|pict|set|system|wait
     ){{tag_name_break}}
 
-  function_tag_name_xpx: |-
-    (?ix:
-      function
-    ){{tag_name_break}}
-
   noparse_tag_name_xpx: |-
     (?ix:
       noparse
@@ -157,7 +152,7 @@ contexts:
   tag-xpx-other-attribute:
     # (?i) case insensitive
     # Tous sauf query (sql).
-    - match: '\s+\b((?i)(align|addpage|base|bgcolor|bit|bitoff|biton|border|by|calc|cc|cci|charset|chartohexa|close|color|connect|content|datetime|decode64|decrypt|delete|dest|dir|domain|encode64|encrypt|eol|exec|exist|expr|file|font|format|frame|from|get|geth|getw|getx|gety|gettext|global|hash|headers|height|hex2bin|hexatochar|hmac|href|html2text|id|info|join|keycode|lang|leading|len|line|local|lowcase|ltrim|maxrows|mode|model|money|msg|name|noaccent|open|option|padding|pagesize|pass|path|port|rand|read|rect|replace|reply|return|rotate|round|rtrim|samesite|select|sep|server|session|size|smtp|socket|start|strcode|strdecode|strescape|style|subject|svg2pdf|text|timeout|transaction|trim|ttl|to|token|type|upcase|urlcode|value|width|write|xmlcode|xpx)\b\s*(=)\s*)'
+    - match: '\s+\b((?i)(align|addpage|base|bgcolor|bit|bitoff|biton|border|by|calc|cc|cci|charset|chartohexa|close|color|connect|content|copy|datetime|decode64|decrypt|delete|dest|dir|domain|encode64|encrypt|eol|exec|exist|expr|file|fill|font|format|frame|from|get|geth|getw|getx|gety|gettext|global|hash|headers|height|hex2bin|hexatochar|hmac|href|html2text|id|info|join|keycode|lang|leading|len|line|local|lowcase|ltrim|maxrows|mode|model|money|msg|name|noaccent|open|option|padding|pagesize|pass|path|port|position|rand|read|rect|replace|reply|return|rotate|round|rtrim|samesite|select|sep|server|session|size|smtp|socket|srcparam|start|strcode|strdecode|strescape|style|subject|svg2pdf|text|timeout|transaction|trim|ttl|to|token|transparency|type|upcase|urlcode|value|width|write|x|xmlcode|xpx|y)\b\s*(=)\s*)'
       captures:
         1: meta.attribute-with-value.xpx
         2: entity.other.attribute-name.xpx
@@ -206,7 +201,6 @@ contexts:
       captures:
         1: punctuation.definition.tag.end.html
       embed: scope:text.xpx
-      embed_scope: meta.tag.function.xpx
       escape: '(</)((?i:function))(>)'
       escape_captures:
         1: punctuation.definition.tag.begin.html

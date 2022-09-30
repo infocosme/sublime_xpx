@@ -271,7 +271,7 @@ def get_xpx_tag_attributes(view, tag, region):
         'mail' : ['cc', 'cci', 'charset', 'file', 'from', 'headers', 'join', 'msg', 'reply', 'smtp', 'subject', 'to', 'type'],
         'noparse' : [],
         'pdf' : ['addpage', 'align', 'bgcolor', 'border', 'calc', 'close', 'color', 'file', 'font', 'frame', 'gettext', 'getx', 'gety', 'href', 'leading', 'line', 'mode', 'name', 'padding', 'pagesize', 'path', 'rect', 'rotate', 'round', 'size', 'style', 'text'],
-        'pict' : ['border', 'calc', 'close', 'color', 'content', 'copy', 'dest', 'fill', 'font', 'geth', 'getw', 'height', 'name', 'path', 'position', 'rect', 'rotate', 'size', 'srcparam', 'text', 'transparency', 'width', 'x', 'y'],
+        'pict' : ['border', 'calc', 'close', 'color', 'content', 'copy', 'dest', 'fill', 'font', 'geth', 'getw', 'height', 'name', 'option', 'path', 'position', 'rect', 'rotate', 'size', 'srcparam', 'text', 'transparency', 'width', 'x', 'y'],
         'scope' : ['name'],
         'set' : ['bit', 'bitoff', 'biton', 'by', 'charset', 'chartohexa', 'datetime', 'decode64', 'decrypt', 'encode64', 'encrypt', 'expr', 'format', 'global', 'hash', 'hex2bin', 'hexatochar', 'hmac', 'html2text', 'keycode', 'lang', 'len', 'local', 'lowcase', 'ltrim', 'money', 'name', 'noaccent', 'rand', 'replace', 'return', 'rtrim', 'session', 'strcode', 'strdecode', 'strescape', 'svg2pdf', 'trim', 'upcase', 'urlcode', 'value', 'xmlcode'],
         'setarea' : ['name', 'option'],
@@ -281,9 +281,6 @@ def get_xpx_tag_attributes(view, tag, region):
         'xpath' : ['file', 'select', 'value'],
         'xproc': ['file', 'select', 'value']
     }
-    #print("view:",view)
-    #print("tag:",tag,len(tag))
-    #print("region:",region)
     # Suppression systématique des attributs déjà positionné dans le tag.
     if (region is not None):
         myattributesalreadypresent = get_xpx_list_attributes(view, region.begin(), tag, region.end())
@@ -369,8 +366,12 @@ def get_xpx_attribute_values(myAttributeName):
         },
         'option' : {
             'include': ['noparse', 'once', 'parse'], 
+            'pict': ['quality', 'speed'],
             'setarea': ['parse', 'noparse'],
             'sql': ['enter', 'notenter']
+        },
+        'position' : {
+            'pict': ['TL', 'TM', 'TR', 'ML', 'MM', 'MR', 'BL', 'BM', 'BR']
         },
         'samesite' : {
             'cookie': ['Lax', 'Strict']
@@ -459,11 +460,6 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         Fonction générale de complétion : tout part de cette fonction.
         """
         #print("on_query_completions", time.strftime("%H:%M:%S"))
-        #print(view)
-        #print(prefix)
-        #print(locations)
-        #return None
-
         # Autorisé uniquement sur un source XPX.
         if not view.match_selector(locations[0], "text.xpx"):
             return None
@@ -573,9 +569,6 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         Objectif :      Renvoi d'une CompletionList contenant les attributs possibles pour le tag en cours.
         """
         #print("attribute_completions")
-        #print(view)
-        #print(pt)
-        #print("prefix:",prefix,len(prefix))
         # Complément avec un éventuel prototype de fonction.
         # Contrôle si la complétion a été demandée (view, pt) sur un function exec dont la valeur existe.
         # Recherche du prototype correspondant parmi les symbol.
@@ -618,12 +611,10 @@ class XpxTagCompletions(sublime_plugin.EventListener):
         myPosPunctuation = view.find_by_class(pt, False, sublime.CLASS_PUNCTUATION_START)
         myPosAttributeName = view.find_by_class(myPosPunctuation, False, sublime.CLASS_WORD_START)
         myAttributeName = view.substr(sublime.Region(myPosAttributeName, myPosPunctuation))
-        #print(myAttributeName)
 
         # Recherche du nom du tag.
         ptfindtag = view.expand_by_class(pt,sublime.CLASS_PUNCTUATION_START | sublime.CLASS_PUNCTUATION_END,"<>").begin()+1
         myTagName = view.substr(view.expand_by_class(ptfindtag,sublime.CLASS_WORD_START | sublime.CLASS_WORD_END))
-        #print(myTagName)
 
         """
         # Tentative de completion du function exec avec la liste des fonctions du projet.
