@@ -301,7 +301,8 @@ contexts:
   # Région des arguments function (définies par dev.) différent des propriétés imposées par langage : name et exec.
   tag-xpx-function-other-attribute:
     # Pour la balise function : n'importe quel nom de propriété.
-    - match: '\s+\b(([a-zA-Z0-9_]*)\b\s*(=)\s*)'
+    # 24/11/2022 : Ajout du point dans le nom de l'attribut.
+    - match: '\s+\b(([a-zA-Z0-9_.-]*)\b\s*(=)\s*)'
       captures:
         1: meta.attribute-with-value.xpx
         2: entity.other.attribute-name.xpx
