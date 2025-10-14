@@ -8,15 +8,16 @@ extends: Packages/HTML/HTML.sublime-syntax
 
 ###############################################################################
 
+# Ne pas traiter function car traité à part.
 variables:
   block_tag_name_xpx: |-
     (?ix:
-      cond|csv|scope|setarea|sql|while|xpath|xproc
+      cond|csv|function|json|scope|setarea|sql|while
     ){{tag_name_break}}
 
   inline_tag_name_xpx: |-
     (?ix:
-      cookie|connect|create|debug|dir|else|file|get|http|include|mail|pdf|pict|set|system|wait
+      array|connect|cookie|create|debug|dir|else|file|get|http|include|mail|pdf|pict|set|system|unset|wait|xpath|xproc
     ){{tag_name_break}}
 
   noparse_tag_name_xpx: |-
@@ -29,29 +30,13 @@ variables:
 contexts:
 
   main:
-    - match: ""
-      # La page xpx est avant tout analysé en HTML (avec CSS et JS) classique.
-      push: Packages/HTML/HTML.sublime-syntax
-      with_prototype:
-        # Suspendre l'analyse syntaxique XPX durant un commentaire HTML.
-        - include: tag-xpx-comment
-        # Ajouter ensuite les régions XPX en sus des régions HTML.
-        - include: tag-xpx
-        # Permettre la reconnaissance des variables XPX dans le HTML.
-        - match: '\$'
-          scope: punctuation.definition.variable.xpx
-          push: variable-xpx
-
-###[ NO XPX IN COMMENT TAGS ]###############################################
-
-  tag-xpx-comment:
-    - match: <!--
-      scope: punctuation.definition.comment.begin.html
-      push:
-        - meta_scope: comment.block.html
-        - match: '-->'
-          scope: punctuation.definition.comment.end.html
-          pop: true
+    - include: tag-xpx
+      # Permettre la reconnaissance des variables XPX dans le HTML.
+    - match: '\$'
+      scope: punctuation.definition.variable.xpx
+      push: variable-xpx
+      # Si les règles ci-dessus ne fonctionnent pas alors la syntaxe HTML est appliquée par défaut.
+    - meta_prepend: true
 
 ###[ XPX TAGS ]##############################################################
 
@@ -63,7 +48,7 @@ contexts:
         2: entity.name.tag.block.xpx
       push:
         - clear_scopes: 1 # Effacement du scope text.html.basic (Effacement du dernier scope défini avant cette ligne).
-        - meta_scope: meta.tag.xpx meta.tag.block.xpx
+        - meta_scope: text.xpx meta.tag.xpx meta.tag.block.xpx
         - include: tag-end
         - include: tag-xpx-attributes
     - match: (</?)({{inline_tag_name_xpx}})
@@ -72,36 +57,9 @@ contexts:
         2: entity.name.tag.inline.xpx
       push:
         - clear_scopes: 1 # Effacement du scope text.html.basic (Effacement du dernier scope défini avant cette ligne).
-        - meta_scope: meta.tag.xpx meta.tag.inline.xpx
+        - meta_scope: text.xpx meta.tag.xpx meta.tag.inline.xpx
         - include: tag-end-maybe-self-closing
         - include: tag-xpx-attributes
-    - match: (</?)({{noparse_tag_name_xpx}})
-      captures:
-        1: punctuation.definition.tag.begin.html
-        2: entity.name.tag.block.xpx
-      push:
-        - clear_scopes: 1 # Effacement du scope text.html.basic (Effacement du dernier scope défini avant cette ligne).
-        - meta_scope: meta.tag.xpx meta.tag.noparse.xpx
-        - match: (?i)(</)(noparse)(>)
-          captures:
-            1: punctuation.definition.tag.begin.html
-            2: entity.name.tag.noparse.xpx
-            3: punctuation.definition.tag.end.html
-          pop: true
-        - match: '>'
-          scope: punctuation.definition.tag.end.html
-          push:
-            - include: 'scope:text.html.basic'
-          with_prototype:
-            - match: (?i)(</)(noparse)(>)
-              captures:
-                1: punctuation.definition.tag.begin.html
-                2: entity.name.tag.block.xpx
-                3: punctuation.definition.tag.end.html
-              push:
-                - clear_scopes: 2 # Effacement des scopes meta.tag.xpx et meta.tag.noparse.xpx (Effacement des deux derniers scopes définis avant cette ligne).
-                - include: 'scope:text.html.basic'
-                - include: 'scope:text.xpx'
 
 ###[ XPX ATTRIBUTES ]#############################################################
 
@@ -115,36 +73,18 @@ contexts:
   tag-xpx-query-attribute:
     - match: (?i:query){{attribute_name_break}}
       scope: entity.other.attribute-name.query.xpx
-      push:
-        - tag-xpx-query-attribute-meta
-        - tag-xpx-query-attribute-assignment
-
-  tag-xpx-query-attribute-meta:
-    - meta_include_prototype: false
-    - meta_scope: meta.attribute-with-value.xpx meta.attribute-with-value.query.xpx
-    - include: immediately-pop
-
-  tag-xpx-query-attribute-assignment:
     - match: =
       scope: punctuation.separator.key-value.html
-      set: tag-xpx-query-attribute-value
-    - include: else-pop
-
-  tag-xpx-query-attribute-value:
     - match: \"
       scope: punctuation.definition.string.begin.xpx
       push: Packages/SQL/SQL.sublime-syntax
       with_prototype:
-        # Eliminer tous les guillements échappés.
-        - match: '\\"'
-        - match: '"'
-          scope: punctuation.definition.string.end.xpx
-          pop: true
         - match: '\$'
           scope: punctuation.definition.variable.xpx
           push: variable-xpx
-    - match: ''
-      pop: true
+        - match: \"
+          scope: punctuation.definition.string.end.xpx
+          pop: true
 
 ###[ OTHER XPX ATTRIBUTES ]########################################################
 
@@ -152,7 +92,7 @@ contexts:
   tag-xpx-other-attribute:
     # (?i) case insensitive
     # Tous sauf query (sql).
-    - match: '\s+\b((?i)(align|addpage|base|bgcolor|bit|bitoff|biton|border|by|calc|cc|cci|charset|chartohexa|close|color|connect|content|copy|create|datetime|decode64|decrypt|delete|dest|dir|domain|encode64|encrypt|eol|exec|exist|expr|file|fill|font|format|frame|from|get|geth|getw|getx|gety|gettext|global|hash|headers|height|hex2bin|hexatochar|hmac|href|html2text|id|info|join|keycode|lang|leading|len|line|list|local|lowcase|ltrim|maxrows|mode|model|money|msg|name|noaccent|open|option|padding|pagesize|pass|path|port|position|printparam|rand|read|rect|replace|reply|return|rotate|round|rtrim|samesite|select|sep|server|session|size|smtp|socket|srcparam|start|strcode|strdecode|strescape|style|subject|suffix|svg2pdf|text|timeout|transaction|trim|ttl|to|token|transparency|type|upcase|urlcode|value|width|write|x|xmlcode|xpx|y)\b\s*(=)\s*)'
+    - match: '\s+\b((?i)(align|addpage|array|base|bgcolor|bit|bitoff|biton|border|by|calc|cc|cci|charset|chartohexa|close|col|color|connect|content|copy|count|create|datetime|decode64|decrypt|delete|delimiter|dest|dir|domain|encode64|encrypt|eol|exec|exist|expr|file|fill|font|format|frame|from|get|geth|getw|getx|gety|gettext|global|hash|header|headers|height|hex2bin|hexatochar|hmac|href|html2text|id|info|join|keycode|lang|leading|len|line|list|local|lowcase|ltrim|maxrows|mode|model|money|msg|name|noaccent|notexist|open|option|padding|pagesize|pass|path|pattern|port|position|printparam|rand|read|rect|replace|reply|return|rotate|round|row|rtrim|scope|samesite|select|sep|server|session|size|smtp|socket|srcparam|start|strcode|strdecode|strescape|style|subject|suffix|svg2pdf|text|timeout|transaction|trim|ttl|to|token|transparency|type|upcase|urlcode|value|width|write|x|xmlcode|xpx|y)\b\s*(=)\s*)'
       captures:
         1: meta.attribute-with-value.xpx
         2: entity.other.attribute-name.xpx
@@ -183,24 +123,22 @@ contexts:
         1: punctuation.definition.tag.begin.html
         2: entity.name.tag.block.xpx
       push:
-        - clear_scopes: 1 # Effacement du scope text.html.basic (Effacement du dernier scope défini avant cette ligne).
         # Scope global valable depuis le premier caractère ponctuation balise.
         - meta_scope: meta.tag.xpx meta.tag.function.xpx
         # Interprétation des attributs du tag.
         - include: tag-xpx-function-name-attribute
         - include: tag-xpx-function-exec-attribute
         - include: tag-xpx-function-other-attribute
-        # Détection de la fin de la balise bloc.
-        - include: tag-xpx-function-end
         # Détection de fin de balise inline.
         - include: tag-xpx-function-end-inline
+        # Détection de la fin de la balise bloc.
+        - include: tag-xpx-function-end
 
   tag-xpx-function-end:
     # Détection de la fin du inline potentiel.
     - match: '(>)'
       captures:
         1: punctuation.definition.tag.end.html
-      embed: scope:text.xpx
       escape: '(</)((?i:function))(>)'
       escape_captures:
         1: punctuation.definition.tag.begin.html
@@ -269,33 +207,6 @@ contexts:
         - match: ''
           pop: true
 
-###[ XPX FUNCTION ATTRIBUTE NAMESPACE ]########################################################
-
-  # Définir une région (scope) d'un attribut XPX (tous sauf query).
-  tag-xpx-function-namespace-attribute:
-    # (?i) case insensitive
-    - match: '\s+\b((?i)(namespace)\b\s*(=)\s*)'
-      captures:
-        1: meta.attribute-with-value.xpx
-        2: entity.other.attribute-name.xpx
-        3: punctuation.separator.key-value.html
-      push:
-        - match: '"'
-          scope: punctuation.definition.string.begin.xpx
-          set:
-            # Eliminer tous les guillements échappés.
-            - match: '\\"'
-            - meta_scope: meta.attribute-with-value.xpx
-            - meta_content_scope: entity.name.namespace.xpx
-            - match: '"'
-              scope: punctuation.definition.string.end.xpx
-              pop: true
-            - match: '\$'
-              scope: punctuation.definition.variable.xpx
-              push: variable-xpx
-        - match: ''
-          pop: true
-
 ###[ XPX FUNCTION ATTRIBUTE ANY ]########################################################
 
   # Région des arguments function (définies par dev.) différent des propriétés imposées par langage : name et exec.
@@ -323,44 +234,6 @@ contexts:
               push: variable-xpx
         - match: ''
           pop: true
-
-###[ SCRIPT JAVASCRIPT ]########################################################
-
-  xpx-script-tag:
-    - match: (<)((?i:script)){{tag_name_break}}
-      captures:
-        1: punctuation.definition.tag.begin.html
-        2: entity.name.tag.script.html
-      push: xpx-script-javascript
-    - match: (</)((?i:script){{tag_name_break}})
-      captures:
-        1: punctuation.definition.tag.begin.html
-        2: entity.name.tag.script.html
-      push: xpx-script-close-tag-content
-
-  xpx-script-close-tag-content:
-    - meta_scope: meta.tag.script.end.html
-    - include: tag-end
-
-  xpx-script-javascript:
-    - meta_scope: meta.tag.script.begin.html
-    - include: script-common
-    - match: '>'
-      scope: punctuation.definition.tag.end.html
-      set: xpx-script-javascript-content
-
-  xpx-script-javascript-content:
-    - meta_include_prototype: false
-    - match: '{{script_content_begin}}'
-      captures:
-        1: comment.block.html punctuation.definition.comment.begin.html
-      pop: 1  # make sure to match only once
-      embed: scope:source.js
-      embed_scope: source.js.embedded.html
-      escape: '{{script_content_end}}'
-      escape_captures:
-        1: source.js.embedded.html
-        2: comment.block.html punctuation.definition.comment.end.html
 
 ###[ XPX VARIABLES ]########################################################
 

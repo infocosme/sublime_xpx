@@ -1,6 +1,6 @@
 # XPX syntax
 
-Plugin Sublime Text 4 (>= v4126)
+Plugin Sublime Text 4 (>= v4200)
 
 ## Contenu
 

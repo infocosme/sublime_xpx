@@ -8,7 +8,7 @@
 			"releases": [
 				{
 					"platforms": ["windows", "osx", "linux"],
-					"sublime_text": ">=4126",
+					"sublime_text": ">=4200",
 					"tags": true
 				}
 			]
