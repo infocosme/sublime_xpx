@@ -1,0 +1,22 @@
+%YAML 1.2
+---
+# CSS embarqué dans un fichier XPX (<style>, style="...").
+# Ajoute les balises et variables XPX à la syntaxe CSS officielle.
+#   <style>.logo { background: url($gUrlImg$/logo.png); }</style>
+name: CSS (XPX)
+scope: source.css.xpx
+version: 2
+hidden: true
+
+extends: Packages/CSS/CSS.sublime-syntax
+
+contexts:
+
+  prototype:
+    - meta_prepend: true
+    - include: scope:text.html.xpx#xpx-tags
+    - include: scope:text.html.xpx#xpx-variables
+
+  string-content:
+    - meta_prepend: true
+    - include: scope:text.html.xpx#xpx-interpolations

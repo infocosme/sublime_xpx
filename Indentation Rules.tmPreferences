@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Indentation automatique des fichiers XPX.
+
+	Reprend les règles HTML officielles (Packages/HTML/Indentation Rules)
+	en y ajoutant les particularités XPX :
+	- les balises XPX « inline » s'écrivent souvent sans « /> »
+	  (<set ...>, <include ...>, <get ...>) : elles n'indentent pas
+	  la ligne suivante ;
+	- <function exec="..."> est un appel (inline), <function name="...">
+	  une définition (bloc) ;
+	- <else> ressort d'un cran puis indente la ligne suivante, comme
+	  le contenu de <cond>.
+
+	https://www.sublimetext.com/docs/indentation.html
+-->
+<plist version="1.0">
+<dict>
+	<key>scope</key>
+	<string>text.html.xpx</string>
+	<key>settings</key>
+	<dict>
+		<key>decreaseIndentPattern</key>
+		<string><![CDATA[(?x)
+			# une balise fermante HTML ou XPX en début de ligne (sauf </html>)
+			  ^[^<>]*+ </ (?!html[\t\n\f /<>])[^\t\n\f /<>]+ [^>]* >
+			# XPX : <else> ou <else expr="..."> en début de ligne
+			| ^[\t\n\f ]*+ <(?i:else)[\t\n\f />]
+			| ^[\t\n\f ]*+
+			(
+				# fin de commentaire HTML suivie de </script> ou </style>
+				  --> [\t\n\f ]* </ (?: script | style )[\t\n\f /<>]
+				# fin de section <? ?> ou <% %>
+				| [?%]>
+				# accolade fermante
+				| \}
+			)
+		]]></string>
+		<key>increaseIndentPattern</key>
+		<string><![CDATA[(?x)
+			^.* (
+				# une balise ouvrante qui n'est ni auto-fermante,
+				# ni refermée sur la même ligne
+				<(?!
+					  !--           # pas un commentaire
+					| [?%]          # pas une section PHP/ASP
+					| (?i:!doctype) # pas un doctype
+					# balises HTML vides
+					| (?i:area|base|br|col|frame|hr|html|img|input|link|meta|param)[\t\n\f /<>]
+					# balises XPX inline (souvent écrites sans « /> »)
+					| (?i:connect|cookie|create|debug|dir|file|get|http|include|mail|pict|set|system|unset|wait|xpath)[\t\n\f /<>]
+					# appel de fonction XPX : <function exec="...">
+					| (?i:function)[\t\n\f ][^>]*?\b(?i:exec)[\t\n\f ]*=
+				)(?:
+					# nom de la balise
+					(?<html_tag>[^\t\n\f /<>]+)
+					# pas auto-fermante
+					(?:(?!/>)[^>])* >
+					# pas refermée sur la même ligne
+					(?! .* </\k<html_tag>)
+				)
+				# section <? ou <% non refermée sur la même ligne
+				| <\?(?!.*?\?>)
+				| <\%(?!.*?\%>)
+				# accolade ouvrante en fin de ligne
+				| \{(?=\s*(?:<!--.*)?$)
+			)
+		]]></string>
+		<key>bracketIndentNextLinePattern</key>
+		<string><![CDATA[<(?i:!doctype)(?!.*>)]]></string>
+	</dict>
+</dict>
+</plist>

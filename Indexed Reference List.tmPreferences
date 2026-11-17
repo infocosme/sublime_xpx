@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Appels de fonctions XPX : <function exec="maFonction" ... />
+	- showInIndexedReferenceList : Goto Reference (Maj+F12) et liste des
+	                               références dans l'aperçu au survol.
+	https://www.sublimetext.com/docs/symbol_index.html
+-->
+<plist version="1.0">
+<dict>
+	<key>scope</key>
+	<string>text.html.xpx variable.function.xpx</string>
+	<key>settings</key>
+	<dict>
+		<key>showInIndexedReferenceList</key>
+		<integer>1</integer>
+	</dict>
+</dict>
+</plist>

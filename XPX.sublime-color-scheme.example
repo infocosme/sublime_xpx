@@ -1,0 +1,164 @@
+// Exemple de personnalisation des couleurs XPX (package XPX v1.5.0).
+//
+// Ce fichier n'est PAS chargé automatiquement : le package n'impose aucune
+// couleur, les scopes XPX suivent les conventions Sublime Text et sont donc
+// colorés par n'importe quel color scheme.
+//
+// Pour l'utiliser avec ton color scheme (ici Mariana) :
+//   1. Preferences > Customize Color Scheme
+//      (ouvre Packages/User/<ton color scheme>.sublime-color-scheme)
+//   2. Copier les blocs "variables" et "rules" ci-dessous dans ce fichier.
+//
+// Documentation : https://www.sublimetext.com/docs/color_schemes.html
+{
+	"variables":
+	{
+		"xpx-tag": "#FF9500",
+		"xpx-guillemet": "#D1932D",
+		"xpx-attribute": "#A6E22E",
+		"xpx-value": "#99C794",
+		"xpx-variable": "#FFD800",
+		"xpx-embedded": "#FFC6C2",
+	},
+	"rules":
+	[
+		// Balises XPX : <set ... />, <cond ...>, </cond>
+		{
+			"name": "XPX - balise",
+			"scope": "entity.name.tag.xpx, meta.tag.xpx punctuation.definition.tag",
+			"foreground": "var(xpx-tag)",
+		},
+		// Attributs : name=, value=, expr=, query=
+		{
+			"name": "XPX - nom d'attribut",
+			"scope": "entity.other.attribute-name.xpx",
+			"foreground": "var(xpx-attribute)",
+		},
+		// Paramètres d'une fonction : <function name="f" param1="">
+		{
+			"name": "XPX - paramètre de fonction",
+			"scope": "variable.parameter.xpx",
+			"foreground": "var(xpx-attribute)",
+			"font_style": "italic",
+		},
+		// Guillemets des valeurs d'attribut
+		{
+			"name": "XPX - guillemets",
+			"scope": "punctuation.definition.string.begin.xpx, punctuation.definition.string.end.xpx",
+			"foreground": "var(xpx-guillemet)",
+		},
+		// Valeurs d'attribut
+		{
+			"name": "XPX - valeur d'attribut",
+			"scope": "string.quoted.double.xpx, string.quoted.single.xpx, string.unquoted.xpx",
+			"foreground": "var(xpx-value)",
+		},
+		// Valeurs non quotées d'une expression : expr="$proc$=doReception"
+		{
+			"name": "XPX - expression",
+			"scope": "meta.expression.xpx",
+			"foreground": "var(xpx-value)",
+		},
+		// Fonctions : définition (name) et appel (exec)
+		{
+			"name": "XPX - définition de fonction",
+			"scope": "entity.name.function.xpx",
+			"foreground": "var(xpx-value)",
+			"font_style": "bold",
+		},
+		{
+			"name": "XPX - appel de fonction",
+			"scope": "variable.function.xpx",
+			"foreground": "var(xpx-value)",
+			"font_style": "italic",
+		},
+		// Variables : $maVar$ (y compris dans HTML, JS, CSS et SQL)
+		{
+			"name": "XPX - variable",
+			"scope": "variable.other.readwrite.xpx, punctuation.definition.variable.xpx, meta.variable.xpx punctuation.section",
+			"foreground": "var(xpx-variable)",
+		},
+		// Variables internes : $phcerrmsg$, $sqlrowcount$, ...
+		{
+			"name": "XPX - variable interne",
+			"scope": "variable.language.xpx",
+			"foreground": "var(xpx-variable)",
+			"font_style": "italic",
+		},
+		// Variables imbriquées : $tab[indice]$, $nom(1,len)$
+		{
+			"name": "XPX - variable imbriquée",
+			"scope": "variable.other.embedded.xpx",
+			"foreground": "var(xpx-embedded)",
+		},
+		// ---------------------------------------------------------------
+		// Fichiers de debug XPX (*.debug)
+		// Ligne vide numérotée qui ouvre le bloc de chaque balise
+		// interprétée : séparateur de zone, fond teinté.
+		{
+			"name": "XPX Debug - début de bloc d'une balise",
+			"scope": "meta.block-start.xpx-debug",
+			"background": "color(var(xpx-tag) alpha(0.18))",
+		},
+		// Numéros de ligne en blanc ; lignes de détail estompées.
+		{
+			"name": "XPX Debug - numéros de ligne",
+			"scope": "constant.numeric.line-number.xpx-debug, punctuation.separator.line-number.xpx-debug",
+			"foreground": "#FFFFFF",
+		},
+		{
+			"name": "XPX Debug - détails estompés",
+			"scope": "comment.line.xpx-debug, comment.line.parse.xpx-debug, comment.line.length.xpx-debug",
+			"foreground": "color(#FFFFFF alpha(0.35))",
+		},
+		// Entrée et sortie des includes.
+		{
+			"name": "XPX Debug - includes",
+			"scope": "markup.heading.2.xpx-debug",
+			"foreground": "#5FB3B3",
+			"font_style": "bold",
+		},
+		{
+			"name": "XPX Debug - début et fin du debug",
+			"scope": "markup.heading.1.xpx-debug",
+			"foreground": "#FFFFFF",
+			"font_style": "bold",
+		},
+		// Résultat des conditions.
+		{
+			"name": "XPX Debug - condition vraie",
+			"scope": "constant.language.boolean.true.xpx-debug",
+			"foreground": "#FFFFFF",
+			"background": "color(#99C794 alpha(0.45))",
+			"font_style": "bold",
+		},
+		{
+			"name": "XPX Debug - condition fausse",
+			"scope": "constant.language.boolean.false.xpx-debug",
+			"foreground": "#FFFFFF",
+			"background": "color(#EC5F67 alpha(0.45))",
+			"font_style": "bold",
+		},
+		// Erreurs SQL et XPX.
+		{
+			"name": "XPX Debug - erreurs",
+			"scope": "invalid.illegal.error.xpx-debug",
+			"foreground": "#FFFFFF",
+			"background": "#EC5F67",
+			"font_style": "bold",
+		},
+		// Avertissements (XPXERR=0 suivi d'un message).
+		{
+			"name": "XPX Debug - avertissements",
+			"scope": "invalid.deprecated.warning.xpx-debug",
+			"foreground": "#202020",
+			"background": "#F99157",
+		},
+		// Valeurs lues ou affectées.
+		{
+			"name": "XPX Debug - valeurs",
+			"scope": "string.unquoted.value.xpx-debug",
+			"foreground": "var(xpx-value)",
+		},
+	],
+}

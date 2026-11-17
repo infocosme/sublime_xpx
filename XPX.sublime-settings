@@ -1,0 +1,53 @@
+// Réglages propres aux fichiers XPX.
+// Ils peuvent être surchargés par l'utilisateur :
+//   Preferences > Settings - Syntax Specific (fichier XPX ouvert).
+// Aucun color scheme n'est imposé : les scopes XPX suivent les conventions
+// Sublime Text et sont colorés par n'importe quel color scheme.
+{
+	// Conventions de code XPX : tabulations équivalentes à 3 espaces.
+	"tab_size": 3,
+	"translate_tabs_to_spaces": false,
+
+	// Nouveaux fichiers : fin de ligne unix (\n).
+	"default_line_ending": "unix",
+
+	// Complétion XPX (balises, attributs, valeurs, paramètres de fonctions,
+	// variables internes).
+	"xpx_completions": true,
+
+	// Balises inline insérées par la complétion avec « /> » :
+	//   true  : <set name="" value="" />
+	//   false : <set name="" value="">
+	"xpx_self_closing_tags": true,
+
+	// ---------------------------------------------------------------------
+	// Variables d'arborescence et chemins des <include>.
+	// Le projet Sublime Text reproduit l'arborescence du serveur : le dossier
+	// du site est le DOCUMENT_ROOT (« / » des chemins XPX).
+	// Ces réglages peuvent être placés dans la rubrique "settings" du fichier
+	// .sublime-project pour un projet particulier.
+
+	// Dossiers « fonctionnels » partagés : jamais la racine du site.
+	// Racine du site = premier dossier du projet qui n'est pas dans cette liste.
+	"xpx_functional_folders": ["httpdocs_tools", "httpdocs_common"],
+
+	// Fichiers de définitions prioritaires (chemins relatifs à la racine).
+	"xpx_definition_files": ["inc/global.inc.xpx"],
+
+	// Site dont les surcharges s'appliquent (inc/<site>/xpx.conf,
+	// inc/<site>/global.inc.xpx). Vide : valeurs par défaut.
+	"xpx_site": "",
+
+	// Préfixe des variables de chemin XPX (à utiliser dans <include>)
+	// et des variables d'URL HTML (à ne pas utiliser dans <include>).
+	"xpx_path_variable_prefix": "gRep",
+	"xpx_url_variable_prefix": "gUrl",
+
+	// Dossiers ignorés par l'index du package (fonctions et variables).
+	"xpx_ignored_folders": ["archives"],
+
+	// Le point fait partie des noms XPX (xpxForms.init, $row.nom$) :
+	// double-clic, Goto Definition (F12) et aperçu au survol prennent
+	// le nom complet au lieu de s'arrêter au point.
+	"word_separators": "/\\()\"'-:,;<>~!@#$%^&*|+=[]{}`~?",
+}

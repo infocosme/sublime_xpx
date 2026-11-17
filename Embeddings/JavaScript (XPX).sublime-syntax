@@ -1,0 +1,23 @@
+%YAML 1.2
+---
+# JavaScript embarqué dans un fichier XPX (<script>, onclick="...").
+# Ajoute les balises et variables XPX à la syntaxe JavaScript officielle.
+#   <script>alert("$msg$");</script>
+#   <script><cond expr="!$x$">f();<else>g();</cond></script>
+name: JavaScript (XPX)
+scope: source.js.xpx
+version: 2
+hidden: true
+
+extends: Packages/JavaScript/JavaScript.sublime-syntax
+
+contexts:
+
+  prototype:
+    - meta_prepend: true
+    - include: scope:text.html.xpx#xpx-tags
+    - include: scope:text.html.xpx#xpx-variables
+
+  string-content:
+    - meta_prepend: true
+    - include: scope:text.html.xpx#xpx-interpolations

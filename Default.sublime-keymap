@@ -1,0 +1,14 @@
+[
+	// Fermeture automatique des balises dans les fichiers XPX :
+	// « / » tapé juste après « < » insère le nom de la dernière balise ouverte.
+	// Remplace close_tag de Sublime Text, qui ne connaît pas les balises XPX
+	// inline écrites sans « /> » (<set ...>, <include ...>, <else>).
+	{
+		"keys": ["/"],
+		"command": "xpx_close_tag",
+		"context": [
+			{ "key": "selector", "operator": "equal", "operand": "text.html.xpx - string - meta.string - comment", "match_all": true },
+			{ "key": "preceding_text", "operator": "regex_contains", "operand": "<$", "match_all": true },
+		]
+	},
+]

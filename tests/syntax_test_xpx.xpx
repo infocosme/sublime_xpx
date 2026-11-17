@@ -1,0 +1,189 @@
+## SYNTAX TEST "Packages/XPX/XPX.sublime-syntax"
+
+###[ BALISES INLINE ET BLOC ]###
+
+  <set name="maVar" value="maValeur" />
+##^ meta.tag.xpx punctuation.definition.tag.begin.xpx
+## ^^^ meta.tag.xpx entity.name.tag.xpx
+##     ^^^^ meta.attribute-with-value.xpx entity.other.attribute-name.xpx
+##         ^ punctuation.separator.key-value.xpx
+##          ^^^^^^^ meta.string.xpx string.quoted.double.xpx
+##                                   ^^ meta.tag.xpx punctuation.definition.tag.end.xpx
+
+  <SET NAME="x" VALUE="1">
+## ^^^ entity.name.tag.xpx
+##     ^^^^ entity.other.attribute-name.xpx
+##                       ^ punctuation.definition.tag.end.xpx
+
+  <setarea name="bloc">texte</setarea>
+## ^^^^^^^ entity.name.tag.xpx
+##                     ^^^^^ - meta.tag
+##                          ^^ punctuation.definition.tag.begin.xpx
+##                            ^^^^^^^ entity.name.tag.xpx
+
+## <dir> est une balise XPX, pas la balise HTML obsolète
+
+  <dir list="/files" name="retour" pattern="*.pdf" />
+## ^^^ entity.name.tag.xpx - entity.name.tag.html
+
+## Une balise HTML reste HTML
+
+  <div class="c">ok</div>
+## ^^^ entity.name.tag - entity.name.tag.xpx
+##               ^^ - meta.tag
+
+## Balise XPX non refermée : le HTML reprend au « < » suivant
+
+  <set name="x" <div>
+##               ^^^ entity.name.tag - entity.name.tag.xpx
+
+###[ CONDITIONS ET EXPRESSIONS ]###
+
+  <cond expr="$age$ < 18">
+##      ^^^^ entity.other.attribute-name.xpx
+##            ^^^^^ meta.expression.xpx meta.variable.xpx
+##                  ^ meta.expression.xpx keyword.operator.comparison.xpx
+##                    ^^ constant.numeric.xpx
+##                       ^ punctuation.definition.tag.end.xpx
+
+  <else expr="'$nom$' ?= '%dupont%'">
+## ^^^^ entity.name.tag.xpx
+##            ^ string.quoted.single.xpx punctuation.definition.string.begin.xpx
+##              ^^^ variable.other.readwrite.xpx
+##                    ^^ keyword.operator.comparison.xpx
+##                       ^^^^^^^^^^ string.quoted.single.xpx
+
+  <cond expr="!$a$ && $b$ !?= 'x'">
+##            ^ keyword.operator.logical.xpx
+##                 ^^ keyword.operator.logical.xpx
+##                        ^^^ keyword.operator.comparison.xpx
+
+  <while expr="$i$ < 10"><set name="i" expr="$i$+1" /></while>
+## ^^^^^ entity.name.tag.xpx
+##                                              ^ keyword.operator.arithmetic.xpx
+##                                                      ^^^^^ entity.name.tag.xpx
+
+  <cond expr="$proc$=doReception">
+##                  ^ keyword.operator.comparison.xpx
+##                   ^^^^^^^^^^^ meta.expression.xpx - keyword - variable
+
+###[ FONCTIONS ]###
+
+  <function name="ma_fonction" param1="">
+## ^^^^^^^^ entity.name.tag.xpx
+##          ^^^^ entity.other.attribute-name.xpx
+##                ^^^^^^^^^^^ entity.name.function.xpx
+##                             ^^^^^^ variable.parameter.xpx
+
+  </function>
+##  ^^^^^^^^ meta.tag.xpx entity.name.tag.xpx
+
+  <function exec="ma_fonction" param1="val1" />
+##          ^^^^ entity.other.attribute-name.xpx
+##                ^^^^^^^^^^^ variable.function.xpx
+##                             ^^^^^^ variable.parameter.xpx
+##                                     ^^^^ string.quoted.double.xpx
+
+###[ SQL ]###
+
+  <sql query="SELECT Nom FROM T WHERE id = '$id$'" connect="base">
+##     ^^^^^ entity.other.attribute-name.xpx
+##            ^^^^^^ source.sql.embedded.xpx keyword
+##                                          ^^^^ source.sql.embedded.xpx meta.variable.xpx
+##                                               ^ punctuation.definition.string.end.xpx
+##                                                 ^^^^^^^ entity.other.attribute-name.xpx
+
+  </sql>
+##  ^^^ entity.name.tag.xpx
+
+###[ VARIABLES ]###
+
+  Bonjour $Nom$ $Prenom$ !
+##        ^ meta.variable.xpx punctuation.definition.variable.begin.xpx
+##         ^^^ variable.other.readwrite.xpx
+##            ^ punctuation.definition.variable.end.xpx
+##                       ^ - meta.variable
+
+  $phcerrmsg$ $sqlrowcount$ $xproc.content$
+## ^^^^^^^^^ variable.language.xpx
+##             ^^^^^^^^^^^ variable.language.xpx
+##                           ^^^^^^^^^^^^^ variable.language.xpx
+
+  $monTab[i][nom]$ $qte_[idLig]$ $tab[0]$
+## ^^^^^^ variable.other.readwrite.xpx
+##       ^ meta.brackets.xpx punctuation.section.brackets.begin.xpx
+##        ^ meta.brackets.xpx variable.other.embedded.xpx
+##           ^^^ meta.brackets.xpx variable.other.embedded.xpx
+##              ^ punctuation.section.brackets.end.xpx
+##                       ^^^^^ variable.other.embedded.xpx
+##                                    ^ meta.brackets.xpx constant.numeric.integer.xpx
+
+  $nom(1,len)$ $maVar(2,5)$ $t[sqlnumrow]$
+## ^^^ variable.other.readwrite.xpx
+##     ^ meta.parens.xpx constant.numeric.integer.xpx
+##      ^ punctuation.separator.sequence.xpx
+##       ^^^ meta.parens.xpx variable.other.embedded.xpx
+##                    ^ meta.parens.xpx constant.numeric.integer.xpx
+##                             ^^^^^^^^^ meta.brackets.xpx variable.language.xpx
+##                                       ^ punctuation.definition.variable.end.xpx
+
+  $+_Global.lng.err$ $row.nom$
+## ^^^^^^^^^^^^^^^^ variable.other.readwrite.xpx
+##                    ^^^^^^^ variable.other.readwrite.xpx
+
+## Un « $ » isolé n'est pas une variable
+
+  Prix : 10 $ HT et 20 $ TTC
+##          ^ - meta.variable
+##                     ^ - meta.variable
+
+###[ VARIABLES DANS LE HTML ]###
+
+  <a href="$gUrlTools$/page.xpx" title="$t$">lien</a>
+##          ^^^^^^^^^ meta.interpolation.xpx variable.other.readwrite.xpx - string
+##                    ^^^^^^^^^ string.quoted.double
+##                                       ^ meta.interpolation.xpx variable.other.readwrite.xpx
+
+  <option value="1" <cond expr="$x$=1">selected</cond>>Un</option>
+##                   ^^^^ entity.name.tag.xpx
+##                                               ^^^^ entity.name.tag.xpx
+
+###[ JAVASCRIPT ET CSS ]###
+
+  <script>alert("$msg$"); var a = $('#id');</script>
+##        ^^^^^ source.js.embedded.html
+##                ^^^ source.js.embedded.html meta.interpolation.xpx variable.other.readwrite.xpx
+##                                ^ source.js.embedded.html - meta.variable.xpx
+
+  <script><cond expr="!$x$">f();<else>g();</cond></script>
+##         ^^^^ source.js.embedded.html entity.name.tag.xpx
+##                               ^^^^ source.js.embedded.html entity.name.tag.xpx
+##                                    ^ source.js.embedded.html
+
+  <script>var t = `${a}${b}`;</script>
+##                     ^ - meta.variable.xpx
+
+  <button onclick="go('$id$')">Go</button>
+##                      ^^ source.js.embedded.html meta.interpolation.xpx
+
+  <style>.logo { color: $gCouleur$; }</style>
+##                       ^^^^^^^^ source.css.embedded.html meta.variable.xpx
+
+###[ COMMENTAIRES ET NOPARSE ]###
+
+  <!-- <debug mode="normal"> $x$ -->
+##      ^^^^^ comment.block.html - entity.name.tag.xpx
+##                           ^^^ comment.block.html - meta.variable.xpx
+
+  <noparse><set name="x" value="1"> $x$ <b>gras</b></noparse>
+## ^^^^^^^ meta.tag.xpx entity.name.tag.xpx
+##          ^^^ meta.noparse.xpx - entity.name.tag.xpx
+##                                  ^^^ meta.noparse.xpx - meta.variable.xpx
+##                                       ^ meta.noparse.xpx entity.name.tag
+##                                                   ^^^^^^^ entity.name.tag.xpx
+
+###[ ÉCHAPPEMENTS ]###
+
+  <file read="f" content="maLigne" eol="\n" />
+##                                      ^^ constant.character.escape.xpx
+

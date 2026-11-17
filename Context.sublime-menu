@@ -1,0 +1,7 @@
+[
+	{ "caption": "-" },
+	{
+		"caption": "XPX Debug : suivre cette variable",
+		"command": "xpx_debug_track_variable"
+	},
+]

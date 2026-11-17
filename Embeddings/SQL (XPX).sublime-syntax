@@ -1,0 +1,27 @@
+%YAML 1.2
+---
+# SQL de l'attribut query d'une balise <sql>.
+# Ajoute les variables XPX à la syntaxe SQL officielle.
+#   <sql query="SELECT Nom FROM Praticiens WHERE id = '$id$'">
+name: SQL (XPX)
+scope: source.sql.xpx
+version: 2
+hidden: true
+
+extends: Packages/SQL/SQL.sublime-syntax
+
+contexts:
+
+  prototype:
+    - meta_prepend: true
+    - include: scope:text.html.xpx#xpx-variables
+
+  # Chaînes 'simples' (et LIKE '...')
+  string-escapes:
+    - meta_prepend: true
+    - include: scope:text.html.xpx#xpx-interpolations
+
+  # Chaînes "doubles"
+  string-interpolations:
+    - meta_prepend: true
+    - include: scope:text.html.xpx#xpx-interpolations

@@ -1,0 +1,14 @@
+[
+	{
+		"caption": "XPX: Fermer les balises inline par « /> »",
+		"command": "xpx_close_inline_tags"
+	},
+	{
+		"caption": "XPX Debug: Suivre une variable",
+		"command": "xpx_debug_track_variable"
+	},
+	{
+		"caption": "XPX Debug: Effacer le suivi de variable",
+		"command": "xpx_debug_clear_tracking"
+	},
+]

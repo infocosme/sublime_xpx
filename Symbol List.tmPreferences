@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Définitions de fonctions XPX : <function name="maFonction" ...>
+	- showInSymbolList        : Goto Symbol (Ctrl+R) dans le fichier courant.
+	- showInIndexedSymbolList : Goto Symbol in Project (Ctrl+Maj+R),
+	                            Goto Definition (F12) et aperçu au survol.
+	https://www.sublimetext.com/docs/symbol_index.html
+-->
+<plist version="1.0">
+<dict>
+	<key>scope</key>
+	<string>text.html.xpx entity.name.function.xpx</string>
+	<key>settings</key>
+	<dict>
+		<key>showInSymbolList</key>
+		<integer>1</integer>
+		<key>showInIndexedSymbolList</key>
+		<integer>1</integer>
+	</dict>
+</dict>
+</plist>

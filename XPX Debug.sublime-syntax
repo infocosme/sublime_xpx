@@ -1,0 +1,304 @@
+%YAML 1.2
+---
+###############################################################################
+# XPX Debug — fichiers de debug produits par XPX (*.debug)
+# Package XPX v1.5.0
+#
+# Format : chaque ligne commence par le numéro de ligne dans le fichier XPX
+# source (« 42: »), puis un message :
+#   XPX TAG: <SET>                    début de l'analyse d'une balise
+#   PARSE: Param NAME Value maVar     attribut lu
+#   VAR maVar GLOBAL=valeur (6)       variable lue
+#   SET : maVar => valeur             affectation
+#   EXPR ... RESULT: true|false       évaluation d'une condition
+#   SQL EXEC (n): SELECT ...          requête (suite sur plusieurs lignes)
+#   SQL ERROR: ... / XPXERR=n         erreurs
+#   INCLUDE FILE=... / RETURN IN ...  entrée et sortie d'un include
+#
+# Les scopes réutilisent ceux de la syntaxe XPX (balises, attributs,
+# variables) pour garder les mêmes couleurs que dans le code.
+###############################################################################
+
+name: XPX Debug
+scope: text.xpx-debug
+version: 2
+
+file_extensions:
+  - debug
+
+first_line_match: ^\s*\d*:?--- START DEBUG
+
+variables:
+  line_prefix: ^[ \t]*\d+(?=:)
+
+contexts:
+
+  main:
+    - include: block-start
+    - include: line-prefix-tag
+    - include: line-prefix
+    - include: messages
+
+###[ DÉBUT DE BLOC ]###########################################################
+# Une balise interprétée peut commencer par une ligne vide numérotée (« 42: »).
+# Cette ligne sert de séparateur de zone (fond teinté jusqu'au bord), mais
+# seulement si la ligne suivante est bien « XPX TAG: » : on essaie (branch),
+# puis on revient en arrière (fail) si ce n'est pas le cas. Sinon : rien.
+
+  block-start:
+    - match: '(?=^[ \t]*\d+:[ \t]*$)'
+      branch_point: block-start
+      branch:
+        - block-start-candidate
+        - empty-numbered-line
+
+  block-start-candidate:
+    - match: '({{line_prefix}})(:)[ \t]*\n'
+      scope: meta.block-start.xpx-debug
+      captures:
+        1: constant.numeric.line-number.xpx-debug
+        2: punctuation.separator.line-number.xpx-debug
+      set: block-start-check
+    - match: ''
+      fail: block-start
+
+  # La vérification attend le début de la ligne suivante (« ^ ») :
+  # balise -> le surlignage est conservé ; autre chose -> retour en arrière.
+  block-start-check:
+    - match: '^(?=[ \t]*\d+:XPX TAG: )'
+      pop: 1
+    - match: ^
+      fail: block-start
+
+  empty-numbered-line:
+    - match: '({{line_prefix}})(:)[ \t]*\n?'
+      captures:
+        1: constant.numeric.line-number.xpx-debug
+        2: punctuation.separator.line-number.xpx-debug
+      pop: 1
+
+###[ NUMÉRO DE LIGNE ]#########################################################
+
+  line-prefix:
+    - match: '({{line_prefix}})(:)'
+      captures:
+        1: constant.numeric.line-number.xpx-debug
+        2: punctuation.separator.line-number.xpx-debug
+
+  # Ligne « XPX TAG: <...> ».
+  line-prefix-tag:
+    - match: '({{line_prefix}})(:)(?=XPX TAG: )'
+      captures:
+        1: constant.numeric.line-number.xpx-debug
+        2: punctuation.separator.line-number.xpx-debug
+      push: tag-line
+
+  tag-line:
+    - meta_scope: meta.tag-line.xpx-debug
+    - match: (XPX TAG:)\s*(<)(!--)(>)
+      captures:
+        1: keyword.other.tag.xpx-debug
+        2: comment.block.xpx-debug punctuation.definition.tag.begin.xpx
+        3: comment.block.xpx-debug
+        4: comment.block.xpx-debug punctuation.definition.tag.end.xpx
+    - match: (XPX TAG:)\s*(</?)([A-Za-z][\w-]*)(>)
+      captures:
+        1: keyword.other.tag.xpx-debug
+        2: punctuation.definition.tag.begin.xpx
+        3: entity.name.tag.xpx
+        4: punctuation.definition.tag.end.xpx
+    - match: $\n?
+      pop: 1
+
+###[ MESSAGES ]################################################################
+
+  messages:
+    - include: debug-header
+    - include: include-markers
+    - include: functions
+    - include: parse
+    - include: var
+    - include: set
+    - include: expr
+    - include: errors
+    - include: sql
+    - include: misc
+
+  debug-header:
+    - match: -{3}\s*(?:START|CLOSE) DEBUG\b.*$
+      scope: markup.heading.1.xpx-debug
+
+  # Entrée / sortie des fichiers inclus : séparateurs de « chapitres ».
+  include-markers:
+    - match: \*{20,}\s*$
+      scope: markup.heading.2.xpx-debug punctuation.separator.xpx-debug
+    - match: (INCLUDE FILE)(=)(.*)$
+      captures:
+        0: markup.heading.2.xpx-debug meta.include.xpx-debug
+        1: keyword.other.include.xpx-debug
+        2: punctuation.separator.xpx-debug
+        3: string.unquoted.path.xpx-debug
+    - match: (-{10,}\s*END INCLUDE FILE)(=)(.*?)(\s*-{10,})\s*$
+      captures:
+        0: markup.heading.2.xpx-debug meta.include.end.xpx-debug
+        1: keyword.other.include.xpx-debug
+        2: punctuation.separator.xpx-debug
+        3: string.unquoted.path.xpx-debug
+        4: punctuation.separator.xpx-debug
+    - match: (\*+\s*RETURN IN)\s+(.*?)(\s*\*+)\s*$
+      captures:
+        0: markup.heading.2.xpx-debug meta.include.return.xpx-debug
+        1: keyword.other.include.xpx-debug
+        2: string.unquoted.path.xpx-debug
+        3: punctuation.separator.xpx-debug
+
+  functions:
+    - match: (FUNCTION DEFINITION (?:START|END))\s+(line)\s+(\d+)
+      captures:
+        1: keyword.other.function.xpx-debug
+        2: keyword.other.function.xpx-debug
+        3: constant.numeric.xpx-debug
+    - match: (Define function)\s+(\S+)\s+(from)\s+(.*)$
+      captures:
+        1: keyword.other.function.xpx-debug
+        2: entity.name.function.xpx-debug
+        3: keyword.other.function.xpx-debug
+        4: string.unquoted.path.xpx-debug
+
+  # PARSE: Param NAME Value valeur
+  parse:
+    - match: (PARSE:)\s+(Param)\s+(\S+)\s+(Value)\b ?
+      captures:
+        1: comment.line.parse.xpx-debug
+        2: comment.line.parse.xpx-debug
+        3: entity.other.attribute-name.xpx
+        4: comment.line.parse.xpx-debug
+      push: value-to-eol
+
+  # VAR maVar GLOBAL=valeur (6)
+  var:
+    # VAR maVar GLOBALESCAPE STR 1 char: 3
+    - match: (VAR)\s+(\S+)\s+([A-Z]+?)(ESCAPE STR\s+\d+\s+char:)\s?
+      captures:
+        1: keyword.other.var.xpx-debug
+        2: variable.other.readwrite.xpx
+        3: storage.type.origin.xpx-debug
+        4: comment.line.xpx-debug
+      push: value-to-eol
+    - match: (VAR)\s+(\S+)\s+([A-Z]+?)(=)
+      captures:
+        1: keyword.other.var.xpx-debug
+        2: variable.other.readwrite.xpx
+        3: storage.type.origin.xpx-debug
+        4: punctuation.separator.xpx-debug
+      push: var-value
+
+  var-value:
+    - meta_content_scope: string.unquoted.value.xpx-debug
+    - match: (\s+\(\d+\))\s*$
+      captures:
+        1: comment.line.length.xpx-debug
+      pop: 1
+    - match: $
+      pop: 1
+
+  # SET : maVar => valeur
+  set:
+    - match: (SET)\s*(:)\s*(\S+)\s*(=>) ?
+      captures:
+        1: keyword.other.set.xpx-debug
+        2: punctuation.separator.xpx-debug
+        3: variable.other.readwrite.xpx
+        4: keyword.operator.assignment.xpx-debug
+      push: value-to-eol
+
+  # EXPR $a$ < 1 RESULT: true
+  expr:
+    - match: (EXPR)\s
+      captures:
+        1: keyword.other.expr.xpx-debug
+      push: expr-content
+
+  expr-content:
+    - meta_content_scope: meta.expression.xpx-debug
+    - match: (RESULT:)\s*(true)\b
+      captures:
+        1: keyword.other.expr.xpx-debug
+        2: constant.language.boolean.true.xpx-debug markup.inserted.xpx-debug
+      pop: 1
+    - match: (RESULT:)\s*(false)\b
+      captures:
+        1: keyword.other.expr.xpx-debug
+        2: constant.language.boolean.false.xpx-debug markup.deleted.xpx-debug
+      pop: 1
+    - include: scope:text.html.xpx#xpx-variables
+    - match: $
+      pop: 1
+
+  errors:
+    - match: (XPXERR=0)\s*$
+      captures:
+        1: comment.line.xpx-debug
+    # XPXERR=0 suivi d'un message : avertissement (ex. fichier introuvable)
+    - match: XPXERR=0\s+\S.*$
+      scope: invalid.deprecated.warning.xpx-debug
+    - match: XPXERR=[1-9]\d*.*$
+      scope: invalid.illegal.error.xpx-debug
+    - match: SQL ERROR:.*$
+      scope: invalid.illegal.error.xpx-debug
+
+  # SQL EXEC (14): SELECT ...  (la requête continue sur les lignes suivantes,
+  # sans numéro de ligne, jusqu'à la prochaine ligne numérotée)
+  sql:
+    - match: (SQL EXEC)\s*(\()(\d+)(\))(:)\s?
+      captures:
+        1: keyword.other.sql.xpx-debug
+        2: punctuation.section.parens.begin.xpx-debug
+        3: constant.numeric.xpx-debug
+        4: punctuation.section.parens.end.xpx-debug
+        5: punctuation.separator.xpx-debug
+      embed: scope:source.sql
+      embed_scope: source.sql.embedded.xpx-debug
+      escape: ^(?=[ \t]*\d+:)
+    - match: (SQL (?:ROWCOUNT|NB COL))\s*(=)\s*(\d+)
+      captures:
+        1: keyword.other.sql.xpx-debug
+        2: punctuation.separator.xpx-debug
+        3: constant.numeric.xpx-debug
+    - match: (SQL COLUMN)\b.*$
+      scope: comment.line.xpx-debug
+    - match: SQL (?:TEST RESULT|NO RESULT|CONNECTED|DISCONNECTED)\b.*$
+      scope: keyword.other.sql.xpx-debug
+    - match: (SQL Exec time)\s*(=)\s*(.*)$
+      captures:
+        1: keyword.other.sql.xpx-debug
+        2: punctuation.separator.xpx-debug
+        3: constant.numeric.xpx-debug
+
+  misc:
+    - match: (Comment)\s*(:)\s*(.*)$
+      captures:
+        1: comment.line.xpx-debug
+        2: comment.line.xpx-debug
+        3: comment.block.xpx-debug
+    - match: Base dir = .*$
+      scope: comment.line.xpx-debug
+    - match: (CALC)\s+(\w+)\s*(=)\s*(.*)$
+      captures:
+        1: keyword.other.calc.xpx-debug
+        2: storage.type.xpx-debug
+        3: keyword.operator.assignment.xpx-debug
+        4: string.unquoted.value.xpx-debug
+    - match: (GET TOKEN)\s+(\d+)(:)\s?(.*)$
+      captures:
+        1: keyword.other.get.xpx-debug
+        2: constant.numeric.xpx-debug
+        3: punctuation.separator.xpx-debug
+        4: string.unquoted.value.xpx-debug
+
+  # Valeur jusqu'à la fin de la ligne (variables XPX colorées).
+  value-to-eol:
+    - meta_content_scope: string.unquoted.value.xpx-debug
+    - match: $
+      pop: 1
+    - include: scope:text.html.xpx#xpx-interpolations

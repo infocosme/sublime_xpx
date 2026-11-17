@@ -1,0 +1,623 @@
+%YAML 1.2
+---
+###############################################################################
+# XPX — définition de syntaxe pour Sublime Text 4 (>= 4200)
+# Package XPX v1.5.0 — P. Milon
+#
+# Documentation :
+#   https://www.sublimetext.com/docs/syntax.html
+#   https://www.xpx-technologies.net/balise_xpx.html
+#
+# Principes :
+#   - XPX étend la syntaxe HTML officielle (extends) : tout le HTML, le CSS
+#     et le JavaScript restent colorés par les syntaxes livrées avec ST.
+#   - Les balises et variables XPX sont injectées aux points d'extension
+#     prévus par HTML (Plain) : html, tag-attributes,
+#     tag-attribute-value-content, strings-common-content.
+#   - Le JavaScript, le CSS et les requêtes SQL (<sql query="...">) sont
+#     colorés par des variantes cachées (dossier Embeddings/) qui y injectent
+#     les variables et balises XPX.
+#   - Les commentaires HTML <!-- --> restent des commentaires (aucune
+#     coloration XPX à l'intérieur).
+#   - Les scopes suivent les conventions officielles
+#     (https://www.sublimetext.com/docs/scope_naming.html) : n'importe quel
+#     color scheme colore correctement un fichier XPX.
+###############################################################################
+
+name: XPX
+scope: text.html.xpx
+version: 2
+
+extends: Packages/HTML/HTML.sublime-syntax
+
+file_extensions:
+  - xpx
+  - phc
+
+###############################################################################
+
+variables:
+
+  # Balises XPX (insensibles à la casse : <set> = <SET>).
+  # <function> et <noparse> ont un traitement dédié (voir plus bas).
+  xpx_tag_names: |-
+    (?xi:
+        array | cond | connect | cookie | create | csv | debug | dir | else
+      | file | get | http | include | json | mail | pdf | pict | scope | set
+      | setarea | sql | system | unset | wait | while | xpath | xproc
+    ){{tag_name_break}}
+
+  # Caractères autorisés dans un nom de variable XPX.
+  # Exemples : $maVar$  $row.nom$  $+_Global.lng.err$  $xproc.content$
+  xpx_var_char: '[\w.+\-]'
+
+  # Début d'une variable XPX : un « $ » n'ouvre une variable que si la
+  # variable complète est présente sur la même ligne jusqu'au « $ » final.
+  # Un « $ » isolé (jQuery $(...), montant « 10 $ », template JS ${...})
+  # n'est donc jamais pris pour une variable.
+  # Les variables imbriquées s'écrivent SANS « $ » : XPX les interprète
+  # directement à partir de leur nom.
+  #   $nom$          $tab[indice]$       $tab[indice][col]$
+  #   $nom(2,5)$     $nom(1,len)$        (len est une variable)
+  xpx_var_begin: |-
+    \$(?=(?:{{xpx_var_char}}|\[[^\]\s"'<>$]*\]|\([^)"'<>$\n]*\))+\$)
+
+  # Variables internes XPX (lecture seule ou système).
+  xpx_internal_var_names: |-
+    (?xi:
+        phc\w+
+      | sql(?: rowcount | numrow | id | errmsg | err )
+      | csv(?: rowcount | numrow | colcount )
+      | xproc(?: rowcount | numrow | \.(?: content | name | attributes ) )
+    )
+  # ... en tant que variable complète : $phcerrmsg$
+  xpx_internal_vars: '{{xpx_internal_var_names}}(?=\$)'
+  # ... en tant que variable imbriquée : $tab[sqlnumrow]$
+  xpx_internal_vars_embedded: '{{xpx_internal_var_names}}(?!{{xpx_var_char}})'
+
+###############################################################################
+
+contexts:
+
+###[ POINTS D'EXTENSION HTML ]#################################################
+
+  # Texte du document (hors balise HTML).
+  html:
+    - meta_prepend: true
+    - include: xpx-noparse
+    - include: xpx-tags
+    - include: xpx-variables
+
+  # Intérieur d'une balise HTML : <option value="1" <cond ...>selected</cond>>
+  tag-attributes:
+    - meta_prepend: true
+    - include: xpx-tags
+    - include: xpx-variables
+
+  # Un nom d'attribut HTML s'arrête devant une balise XPX :
+  #   <option value="1" <cond expr="$x$=1">selected</cond>>
+  tag-generic-attribute-name:
+    - meta_prepend: true
+    - match: (?=</?(?:{{xpx_tag_names}}|(?i:function){{tag_name_break}}))
+      pop: 1
+
+  # Valeur d'un attribut HTML : <a href="$gUrlTools$/page.xpx">
+  tag-attribute-value-content:
+    - meta_prepend: true
+    - include: xpx-interpolations
+
+  # Toute autre chaîne HTML.
+  strings-common-content:
+    - meta_prepend: true
+    - include: xpx-interpolations
+
+###[ JAVASCRIPT ET CSS EMBARQUÉS ]#############################################
+# Copie des contextes HTML officiels : seule la syntaxe embarquée change
+# (source.js.xpx et source.css.xpx au lieu de source.js et source.css).
+
+  script-javascript-content:
+    - meta_include_prototype: false
+    - match: \s*((<!\[)(CDATA)(\[))
+      captures:
+        1: meta.tag.sgml.cdata.html
+        2: punctuation.definition.tag.begin.html
+        3: keyword.declaration.cdata.html
+        4: punctuation.definition.tag.begin.html
+      pop: 1
+      embed: scope:source.js.xpx
+      embed_scope: meta.tag.sgml.cdata.html source.js.embedded.html
+      escape: \]\]>
+      escape_captures:
+        0: meta.tag.sgml.cdata.html punctuation.definition.tag.end.html
+    - match: '{{script_content_begin}}'
+      captures:
+        1: comment.block.html punctuation.definition.comment.begin.html
+      pop: 1
+      embed: scope:source.js.xpx
+      embed_scope: source.js.embedded.html
+      escape: '{{script_content_end}}'
+      escape_captures:
+        1: source.js.embedded.html
+        2: comment.block.html punctuation.definition.comment.end.html
+        3: source.js.embedded.html
+        4: comment.block.html punctuation.definition.comment.end.html
+
+  style-css-content:
+    - meta_include_prototype: false
+    - match: \s*((<!\[)(CDATA)(\[))
+      captures:
+        1: meta.tag.sgml.cdata.html
+        2: punctuation.definition.tag.begin.html
+        3: keyword.declaration.cdata.html
+        4: punctuation.definition.tag.begin.html
+      pop: 1
+      embed: scope:source.css.xpx
+      embed_scope: meta.tag.sgml.cdata.html source.css.embedded.html
+      escape: \]\]>
+      escape_captures:
+        0: meta.tag.sgml.cdata.html punctuation.definition.tag.end.html
+    - match: '{{style_content_begin}}'
+      captures:
+        1: comment.block.html punctuation.definition.comment.begin.html
+      pop: 1
+      embed: scope:source.css.xpx
+      embed_scope: source.css.embedded.html
+      escape: '{{style_content_end}}'
+      escape_captures:
+        1: source.css.embedded.html
+        2: comment.block.html punctuation.definition.comment.end.html
+        3: source.css.embedded.html
+        4: comment.block.html punctuation.definition.comment.end.html
+
+  # onclick="..." : JavaScript avec variables XPX.
+  tag-event-attribute-value:
+    - match: \"
+      scope: meta.string.html string.quoted.double.html punctuation.definition.string.begin.html
+      embed: scope:source.js.xpx
+      embed_scope: meta.string.html source.js.embedded.html
+      escape: \"
+      escape_captures:
+        0: meta.string.html string.quoted.double.html punctuation.definition.string.end.html
+    - match: \'
+      scope: meta.string.html string.quoted.single.html punctuation.definition.string.begin.html
+      embed: scope:source.js.xpx
+      embed_scope: meta.string.html source.js.embedded.html
+      escape: \'
+      escape_captures:
+        0: meta.string.html string.quoted.single.html punctuation.definition.string.end.html
+    - include: else-pop
+
+  # style="..." : CSS avec variables XPX.
+  tag-style-attribute-value:
+    - match: \"
+      scope: meta.string.html string.quoted.double.html punctuation.definition.string.begin.html
+      embed: scope:source.css.xpx#rule-list-body
+      embed_scope: meta.string.html source.css.embedded.html
+      escape: \"
+      escape_captures:
+        0: meta.string.html string.quoted.double.html punctuation.definition.string.end.html
+    - match: \'
+      scope: meta.string.html string.quoted.single.html punctuation.definition.string.begin.html
+      embed: scope:source.css.xpx#rule-list-body
+      embed_scope: meta.string.html source.css.embedded.html
+      escape: \'
+      escape_captures:
+        0: meta.string.html string.quoted.single.html punctuation.definition.string.end.html
+    - include: else-pop
+
+###[ BALISE NOPARSE ]##########################################################
+# <noparse> ... </noparse> : aucune analyse XPX, HTML standard uniquement.
+
+  xpx-noparse:
+    - match: (<)((?i:noparse))\s*(>)
+      scope: meta.tag.xpx
+      captures:
+        1: punctuation.definition.tag.begin.xpx
+        2: entity.name.tag.xpx
+        3: punctuation.definition.tag.end.xpx
+      embed: scope:text.html.basic
+      embed_scope: meta.noparse.xpx
+      escape: (</)((?i:noparse))\s*(>)
+      escape_captures:
+        0: meta.tag.xpx
+        1: punctuation.definition.tag.begin.xpx
+        2: entity.name.tag.xpx
+        3: punctuation.definition.tag.end.xpx
+
+###[ BALISES XPX ]#############################################################
+# Une balise XPX (ouvrante, fermante ou auto-fermante) :
+#   meta.tag.xpx
+#     punctuation.definition.tag.begin.xpx   <  ou  </
+#     entity.name.tag.xpx                    set, cond, sql, ...
+#     punctuation.definition.tag.end.xpx     >  ou  />
+# La nature « bloc » ou « inline » d'une balise n'est pas portée par la
+# syntaxe : elle est décrite dans les données Python du package.
+
+  xpx-tags:
+    - match: (</?)((?i:function)){{tag_name_break}}
+      captures:
+        1: punctuation.definition.tag.begin.xpx
+        2: entity.name.tag.xpx
+      push: xpx-function-tag-content
+    - match: (</?)({{xpx_tag_names}})
+      captures:
+        1: punctuation.definition.tag.begin.xpx
+        2: entity.name.tag.xpx
+      push: xpx-tag-content
+
+  xpx-tag-content:
+    - meta_scope: meta.tag.xpx
+    - include: xpx-tag-end
+    - include: xpx-variables
+    - include: xpx-expr-attribute
+    - include: xpx-query-attribute
+    - include: xpx-generic-attribute
+
+  xpx-tag-end:
+    - match: /?>
+      scope: punctuation.definition.tag.end.xpx
+      pop: 1
+    # Balise non refermée : on rend la main au HTML au prochain « < »
+    # (évite qu'une erreur de frappe colore tout le reste du fichier).
+    - match: (?=<)
+      pop: 1
+
+###[ BALISE FUNCTION ]#########################################################
+#   <function name="maFonction" param1="">  : définition (indexée, F12)
+#   <function exec="maFonction" param1="x" /> : appel (référence indexée)
+# Les autres attributs sont les paramètres de la fonction.
+
+  xpx-function-tag-content:
+    - meta_scope: meta.tag.xpx
+    - include: xpx-tag-end
+    - include: xpx-variables
+    - match: (?=(?i:name){{attribute_name_break}})
+      push:
+        - xpx-attribute-meta
+        - xpx-function-name-assignment
+        - xpx-attribute-name
+    - match: (?=(?i:exec){{attribute_name_break}})
+      push:
+        - xpx-attribute-meta
+        - xpx-function-exec-assignment
+        - xpx-attribute-name
+    - match: '{{attribute_name_start}}'
+      push:
+        - xpx-attribute-meta
+        - xpx-value-assignment
+        - xpx-parameter-name
+
+  xpx-function-name-assignment:
+    - meta_include_prototype: false
+    - match: =
+      scope: punctuation.separator.key-value.xpx
+      set: xpx-function-name-value
+    - include: else-pop
+
+  xpx-function-name-value:
+    - meta_include_prototype: false
+    - match: \"
+      scope: meta.string.xpx string.quoted.double.xpx punctuation.definition.string.begin.xpx
+      set: xpx-function-name-double-quoted
+    - include: xpx-value
+
+  xpx-function-name-double-quoted:
+    - meta_include_prototype: false
+    - meta_content_scope: meta.string.xpx string.quoted.double.xpx
+    - include: xpx-double-quoted-end
+    - include: xpx-interpolations
+    - match: '[^"$\s]+'
+      scope: entity.name.function.xpx
+
+  xpx-function-exec-assignment:
+    - meta_include_prototype: false
+    - match: =
+      scope: punctuation.separator.key-value.xpx
+      set: xpx-function-exec-value
+    - include: else-pop
+
+  xpx-function-exec-value:
+    - meta_include_prototype: false
+    - match: \"
+      scope: meta.string.xpx string.quoted.double.xpx punctuation.definition.string.begin.xpx
+      set: xpx-function-exec-double-quoted
+    - include: xpx-value
+
+  xpx-function-exec-double-quoted:
+    - meta_include_prototype: false
+    - meta_content_scope: meta.string.xpx string.quoted.double.xpx
+    - include: xpx-double-quoted-end
+    - include: xpx-interpolations
+    - match: '[^"$\s]+'
+      scope: variable.function.xpx
+
+###[ ATTRIBUTS XPX ]###########################################################
+#   meta.attribute-with-value.xpx
+#     entity.other.attribute-name.xpx        nom de l'attribut
+#     punctuation.separator.key-value.xpx    =
+#     meta.string.xpx string.quoted.*.xpx    valeur
+
+  xpx-expr-attribute:
+    - match: (?=(?i:expr){{attribute_name_break}})
+      push:
+        - xpx-attribute-meta
+        - xpx-expr-assignment
+        - xpx-attribute-name
+
+  xpx-query-attribute:
+    - match: (?=(?i:query){{attribute_name_break}})
+      push:
+        - xpx-attribute-meta
+        - xpx-query-assignment
+        - xpx-attribute-name
+
+  xpx-generic-attribute:
+    - match: '{{attribute_name_start}}'
+      push:
+        - xpx-attribute-meta
+        - xpx-value-assignment
+        - xpx-attribute-name
+
+  xpx-attribute-meta:
+    - meta_include_prototype: false
+    - meta_scope: meta.attribute-with-value.xpx
+    - include: immediately-pop
+
+  xpx-attribute-name:
+    - meta_include_prototype: false
+    - meta_scope: entity.other.attribute-name.xpx
+    - match: '{{attribute_name_break}}'
+      pop: 1
+    - match: '["''`<]'
+      scope: invalid.illegal.attribute-name.xpx
+
+  xpx-parameter-name:
+    - meta_include_prototype: false
+    - meta_scope: entity.other.attribute-name.xpx variable.parameter.xpx
+    - match: '{{attribute_name_break}}'
+      pop: 1
+    - match: '["''`<]'
+      scope: invalid.illegal.attribute-name.xpx
+
+###[ VALEURS D'ATTRIBUTS ]#####################################################
+
+  xpx-value-assignment:
+    - meta_include_prototype: false
+    - match: =
+      scope: punctuation.separator.key-value.xpx
+      set: xpx-value
+    - include: else-pop
+
+  xpx-value:
+    - meta_include_prototype: false
+    - match: \"
+      scope: meta.string.xpx string.quoted.double.xpx punctuation.definition.string.begin.xpx
+      set: xpx-value-double-quoted
+    - match: \'
+      scope: meta.string.xpx string.quoted.single.xpx punctuation.definition.string.begin.xpx
+      set: xpx-value-single-quoted
+    - match: '{{unquoted_attribute_start}}'
+      set: xpx-value-unquoted
+    - include: else-pop
+
+  xpx-value-double-quoted:
+    - meta_include_prototype: false
+    - meta_content_scope: meta.string.xpx string.quoted.double.xpx
+    - include: xpx-double-quoted-end
+    - include: xpx-value-content
+
+  xpx-value-single-quoted:
+    - meta_include_prototype: false
+    - meta_content_scope: meta.string.xpx string.quoted.single.xpx
+    - include: xpx-single-quoted-end
+    - include: xpx-value-content
+
+  xpx-value-unquoted:
+    - meta_include_prototype: false
+    - meta_content_scope: meta.string.xpx string.unquoted.xpx
+    - include: tag-attribute-value-unquoted-end
+    - include: xpx-value-content
+
+  xpx-value-content:
+    - include: xpx-interpolations
+    - include: xpx-escapes
+
+  xpx-double-quoted-end:
+    - match: \"
+      scope: meta.string.xpx string.quoted.double.xpx punctuation.definition.string.end.xpx
+      pop: 1
+
+  xpx-single-quoted-end:
+    - match: \'
+      scope: meta.string.xpx string.quoted.single.xpx punctuation.definition.string.end.xpx
+      pop: 1
+
+  # \" \n \r \t ... dans une valeur (eol="\n", headers="...\r\n...").
+  xpx-escapes:
+    - match: \\.
+      scope: constant.character.escape.xpx
+
+###[ ATTRIBUT EXPR ]###########################################################
+# expr="..." (cond, else, while, set) : expression colorée
+#   <cond expr="'$nom$' ?= '%dupont%'">   <while expr="$i$ < 10">
+
+  xpx-expr-assignment:
+    - meta_include_prototype: false
+    - match: =
+      scope: punctuation.separator.key-value.xpx
+      set: xpx-expr-value
+    - include: else-pop
+
+  xpx-expr-value:
+    - meta_include_prototype: false
+    - match: \"
+      scope: meta.string.xpx string.quoted.double.xpx punctuation.definition.string.begin.xpx
+      set: xpx-expr-double-quoted
+    - match: \'
+      scope: meta.string.xpx string.quoted.single.xpx punctuation.definition.string.begin.xpx
+      set: xpx-expr-single-quoted
+    - include: xpx-value
+
+  xpx-expr-double-quoted:
+    - meta_include_prototype: false
+    - meta_content_scope: meta.string.xpx meta.expression.xpx
+    - include: xpx-double-quoted-end
+    - match: \'
+      scope: punctuation.definition.string.begin.xpx
+      push: xpx-expr-literal-single-quoted
+    - include: xpx-expr-content
+
+  xpx-expr-single-quoted:
+    - meta_include_prototype: false
+    - meta_content_scope: meta.string.xpx meta.expression.xpx
+    - include: xpx-single-quoted-end
+    - match: \"
+      scope: punctuation.definition.string.begin.xpx
+      push: xpx-expr-literal-double-quoted
+    - include: xpx-expr-content
+
+  # Chaîne littérale dans une expression : '$nom$'
+  xpx-expr-literal-single-quoted:
+    - meta_include_prototype: false
+    - meta_scope: string.quoted.single.xpx
+    - match: \'
+      scope: punctuation.definition.string.end.xpx
+      pop: 1
+    - match: (?=")
+      pop: 1
+    - include: xpx-value-content
+
+  xpx-expr-literal-double-quoted:
+    - meta_include_prototype: false
+    - meta_scope: string.quoted.double.xpx
+    - match: \"
+      scope: punctuation.definition.string.end.xpx
+      pop: 1
+    - match: (?=')
+      pop: 1
+    - include: xpx-value-content
+
+  xpx-expr-content:
+    - include: xpx-variables
+    - include: xpx-escapes
+    - match: '!\?=|\?='
+      scope: keyword.operator.comparison.xpx
+    - match: '[!<>]=|=|<|>'
+      scope: keyword.operator.comparison.xpx
+    - match: '&&|\|\||!'
+      scope: keyword.operator.logical.xpx
+    - match: '[-+*/%]'
+      scope: keyword.operator.arithmetic.xpx
+    - match: \(
+      scope: punctuation.section.group.begin.xpx
+    - match: \)
+      scope: punctuation.section.group.end.xpx
+    - match: \b\d+(?:\.\d+)?\b
+      scope: constant.numeric.xpx
+
+###[ ATTRIBUT QUERY ]##########################################################
+# <sql query="SELECT ..."> : SQL coloré (avec variables XPX).
+
+  xpx-query-assignment:
+    - meta_include_prototype: false
+    - match: =
+      scope: punctuation.separator.key-value.xpx
+      set: xpx-query-value
+    - include: else-pop
+
+  xpx-query-value:
+    - meta_include_prototype: false
+    - match: \"
+      scope: meta.string.xpx string.quoted.double.xpx punctuation.definition.string.begin.xpx
+      pop: 1
+      embed: scope:source.sql.xpx
+      embed_scope: meta.string.xpx source.sql.embedded.xpx
+      escape: (?<!\\)"
+      escape_captures:
+        0: meta.string.xpx string.quoted.double.xpx punctuation.definition.string.end.xpx
+    - include: xpx-value
+
+###[ VARIABLES XPX ]###########################################################
+#   meta.variable.xpx
+#     punctuation.definition.variable.begin.xpx  $
+#     variable.other.readwrite.xpx               nom
+#     variable.language.xpx                      phcxxx, sqlrowcount, ...
+#     meta.brackets.xpx                          [indice]  (variable sans $)
+#       variable.other.embedded.xpx              indice
+#     meta.parens.xpx                            (debut,longueur)  ex. (1,len)
+#     punctuation.definition.variable.end.xpx    $
+# Dans une chaîne, la variable porte en plus meta.interpolation.xpx et
+# remplace le scope string (convention ST pour les interpolations).
+
+  xpx-variables:
+    - match: '{{xpx_var_begin}}'
+      scope: punctuation.definition.variable.begin.xpx
+      push: xpx-variable-body
+
+  xpx-interpolations:
+    - match: '{{xpx_var_begin}}'
+      scope: punctuation.definition.variable.begin.xpx
+      push: xpx-interpolation-body
+
+  xpx-variable-body:
+    - meta_include_prototype: false
+    - meta_scope: meta.variable.xpx
+    - include: xpx-variable-content
+
+  xpx-interpolation-body:
+    - clear_scopes: 1
+    - meta_include_prototype: false
+    - meta_scope: meta.interpolation.xpx meta.variable.xpx
+    - include: xpx-variable-content
+
+  xpx-variable-content:
+    - match: \$
+      scope: punctuation.definition.variable.end.xpx
+      pop: 1
+    - match: '{{xpx_internal_vars}}'
+      scope: variable.language.xpx
+    - match: '{{xpx_var_char}}+'
+      scope: variable.other.readwrite.xpx
+    - match: \[
+      scope: punctuation.section.brackets.begin.xpx
+      push: xpx-variable-index
+    - match: \(
+      scope: punctuation.section.parens.begin.xpx
+      push: xpx-variable-substring
+    # Sécurité : une variable ne déborde jamais.
+    - match: (?=[\s"'<>])
+      pop: 1
+
+  # [indice] : indice est un nom de variable (sans $) ou un nombre.
+  xpx-variable-index:
+    - meta_include_prototype: false
+    - meta_scope: meta.brackets.xpx
+    - match: \]
+      scope: punctuation.section.brackets.end.xpx
+      pop: 1
+    - include: xpx-embedded-names
+    - match: (?=[\s"'<>$])
+      pop: 1
+
+  # (debut,longueur) : chaque argument est un nombre ou un nom de variable
+  # (sans $). Exemple : $nom(1,len)$
+  xpx-variable-substring:
+    - meta_include_prototype: false
+    - meta_scope: meta.parens.xpx
+    - match: \)
+      scope: punctuation.section.parens.end.xpx
+      pop: 1
+    - match: ','
+      scope: punctuation.separator.sequence.xpx
+    - include: xpx-embedded-names
+    - match: (?=["'<>$\n])
+      pop: 1
+
+  # Nom de variable imbriquée (sans $) ou nombre.
+  xpx-embedded-names:
+    - match: \b\d+\b(?![\w.])
+      scope: constant.numeric.integer.xpx
+    - match: '{{xpx_internal_vars_embedded}}'
+      scope: variable.language.xpx
+    - match: '{{xpx_var_char}}+'
+      scope: variable.other.embedded.xpx

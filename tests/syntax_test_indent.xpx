@@ -1,0 +1,52 @@
+## SYNTAX TEST reindent-unchanged "Packages/XPX/XPX.sublime-syntax"
+<include file="/inc/global.inc.xpx">
+<include option="once" file="$gRepTools$/xpxForms.methods.xpx" />
+<set name="a" value="1">
+<SET NAME="b" VALUE="2">
+<get value="$maDate$" token="-" name="partDate">
+<connect id="base" server="localhost" base="b" name="n" pass="p" />
+<debug mode="normal">
+<!-- commentaire -->
+<cond expr="$a$ = 1">
+	<set name="c" value="3">
+	<unset name="c">
+<else expr="$a$ > 1">
+	<div class="x">
+		<p>texte $a$</p>
+		<br>
+	</div>
+<else>
+	<include option="once" file="x.xpx">
+</cond>
+<cond expr="$age$ < 18">Mineur</cond>
+<function name="maFonction" param1="">
+	<function exec="autre" p="1" />
+	<function exec="autre" p="2">
+	<sql query="SELECT Nom FROM T WHERE id = '$id$'">
+		$Nom$<br>
+	</sql>
+</function>
+<while expr="$i$ < 10">
+	<set name="i" expr="$i$+1" />
+</while>
+<array name="monTab">
+	<set name="monTab[0][nom]" value="Alice" />
+</array>
+<array sort="monTab" col="nom" />
+<setarea name="bloc">
+	contenu
+</setarea>
+<scope name="monScope">
+	<set global="g" value="1">
+</scope>
+<csv file="/data/export.csv" sep=";" name="row.">
+	$row.nom$<br>
+</csv>
+<pdf file="/docs/export.pdf" name="monPDF">
+	<pdf addpage="" />
+	<pdf text="Bonjour" x="50" y="100" />
+</pdf>
+<json name="data">$maVariableJSON$</json>
+<noparse>
+	<set name="exemple" value="1">
+</noparse>
