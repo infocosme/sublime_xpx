@@ -1,9 +1,0 @@
-<snippet>
-	<scope>text.xpx - meta.tag.xpx</scope>
-	<tabTrigger>functionn</tabTrigger>
-	<content>
-		<![CDATA[function name="$1" $2>
-	$0
-</function>]]>
-	</content>
-</snippet>
