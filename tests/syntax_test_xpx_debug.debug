@@ -11,30 +11,30 @@
 ##  ^^^^^^^^ meta.tag-line.xpx-debug keyword.other.tag.xpx-debug
 ##            ^^^^^^^ meta.tag-line.xpx-debug entity.name.tag.xpx
 
-  4:PARSE: Param FILE Value $gRepConnect$/connect.inc.xpx
+  4:PARSE: Param FILE Value $pathConnect$/connect.inc.xpx
 ##  ^^^^^^ comment.line.parse.xpx-debug
 ##               ^^^^ entity.other.attribute-name.xpx
 ##                           ^^^^^^^^^^^ meta.variable.xpx variable.other.readwrite.xpx
 ##                                       ^^^^^^^^^^^^^^^^ string.unquoted.value.xpx-debug
 
-  4:VAR gRepConnect GLOBAL=/inc (4)
+  4:VAR pathConnect GLOBAL=/inc (4)
 ##      ^^^^^^^^^^^ variable.other.readwrite.xpx
 ##                  ^^^^^^ storage.type.origin.xpx-debug
 ##                         ^^^^ string.unquoted.value.xpx-debug
 ##                              ^^^ comment.line.length.xpx-debug
 
- 88:VAR gidSaison GLOBALESCAPE STR 1 char: 3
+ 88:VAR gidPeriod GLOBALESCAPE STR 1 char: 3
 ##      ^^^^^^^^^ variable.other.readwrite.xpx
 ##                ^^^^^^ storage.type.origin.xpx-debug
 ##                                         ^ string.unquoted.value.xpx-debug
 
-  4:Base dir = E:/WebRoot/site/httpdocs
+  4:Base dir = C:/www/monsite/httpdocs
 ##  ^^^^^^^^ comment.line.xpx-debug
 
   4:**************************************************************************
 ##  ^^^^^ markup.heading.2.xpx-debug
 
-  4:INCLUDE FILE=E:/WebRoot/site/httpdocs/inc/connect.inc.xpx
+  4:INCLUDE FILE=C:/www/monsite/httpdocs/inc/connect.inc.xpx
 ##  ^^^^^^^^^^^^ markup.heading.2.xpx-debug keyword.other.include.xpx-debug
 ##               ^^^^^^^^^^ string.unquoted.path.xpx-debug
 
@@ -58,11 +58,11 @@
   5:Comment : <!-- Connexion -->
 ##            ^^^^^^^^^^^^^^^^^^ comment.block.xpx-debug
 
- 15:EXPR !$ckUserID$ AND $ckUserID$>1 RESULT: false
+ 15:EXPR !$cookieId$ AND $cookieId$>1 RESULT: false
 ##         ^^^^^^^^ meta.expression.xpx-debug variable.other.readwrite.xpx
 ##                                            ^^^^^ constant.language.boolean.false.xpx-debug
 
- 44:EXPR $i$<=$gEspace$  (1,6) RESULT: true
+ 44:EXPR $i$<=$gGroupe$  (1,6) RESULT: true
 ##                                     ^^^^ constant.language.boolean.true.xpx-debug
 
  46:CALC int = 2
@@ -87,7 +87,7 @@
 ##  ^^^^^^^^^^^^ keyword.other.sql.xpx-debug
 ##               ^ constant.numeric.xpx-debug
 
- 11:Define function printListParam from E:/WebRoot/site/inc/global.fct.xpx
+ 11:Define function printListParam from C:/www/monsite/inc/global.fct.xpx
 ##                  ^^^^^^^^^^^^^^ entity.name.function.xpx-debug
 
  24:FUNCTION DEFINITION END line 24
@@ -96,10 +96,10 @@
   7:XPX TAG: </SQL>
 ##             ^^^ entity.name.tag.xpx
 
-  6:------------------------ END INCLUDE FILE=E:/WebRoot/site/tpl/rotary.tpl.xpx ------------------------
+  6:------------------------ END INCLUDE FILE=C:/www/monsite/tpl/page.tpl.xpx ------------------------
 ##                           ^^^^^^^^^^^^^^^^ markup.heading.2.xpx-debug
 
-  6:************************ RETURN IN E:/WebRoot/site/index.xpx *******************************
+  6:************************ RETURN IN C:/www/monsite/index.xpx *******************************
 ##                           ^^^^^^^^^ markup.heading.2.xpx-debug keyword.other.include.xpx-debug
 ##                                     ^^^^^^^^^^ string.unquoted.path.xpx-debug
 

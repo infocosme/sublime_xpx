@@ -2,7 +2,7 @@
 ---
 # CSS embarqué dans un fichier XPX (<style>, style="...").
 # Ajoute les balises et variables XPX à la syntaxe CSS officielle.
-#   <style>.logo { background: url($gUrlImg$/logo.png); }</style>
+#   <style>.logo { background: url($urlImg$/logo.png); }</style>
 name: CSS (XPX)
 scope: source.css.xpx
 version: 2

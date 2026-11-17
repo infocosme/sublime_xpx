@@ -6,7 +6,7 @@ Au survol d'un nom de balise XPX (<set, <cond, ...) :
 Au survol d'une variable $maVar$ :
     valeur, valeur résolue, dossier local (variables de chemin), définitions.
 Au survol du chemin d'un <include file="..."> :
-    chemin local (lien), avertissement si introuvable ou si $gUrl…$ utilisé.
+    chemin local (lien), avertissement si introuvable ou si $url…$ utilisé.
 Au survol d'un appel <function exec="maFonction" ... /> :
     lien(s) vers la définition ; avertissement si plusieurs définitions.
 Au survol d'une définition <function name="maFonction" ...> :
@@ -182,7 +182,7 @@ class XpxFunctionHoverListener(sublime_plugin.ViewEventListener):
             elif missing:
                 body += '<div class="warning">Non résolue : {}</div>'.format(
                     html.escape(', '.join(missing), quote=False))
-            prefix = xpx_paths.setting(view, 'xpx_path_variable_prefix', 'gRep').lower()
+            prefix = xpx_paths.setting(view, 'xpx_path_variable_prefix', 'path').lower()
             if prefix and name.lower().startswith(prefix):
                 body += self.path_line(chosen.value, 'Dossier')
             body += '<div class="attrs">Définition : {}</div>'.format(
@@ -203,8 +203,8 @@ class XpxFunctionHoverListener(sublime_plugin.ViewEventListener):
         body = '<h1>Include</h1>' + self.path_line(raw, 'Fichier')
         if xpx_paths.uses_url_variable(self.view, raw):
             body += ('<div class="warning">⚠ Convention : un include doit utiliser '
-                     'une variable de chemin XPX ($gRep…$), pas une variable '
-                     'd\'URL ($gUrl…$)</div>')
+                     'une variable de chemin XPX ($path…$), pas une variable '
+                     'd\'URL ($url…$)</div>')
         return body
 
     def path_line(self, raw, label):

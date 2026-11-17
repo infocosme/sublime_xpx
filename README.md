@@ -49,21 +49,21 @@ Au **survol** d'un nom de fonction :
 ### Variables d'arborescence et `<include>`
 
 Le projet Sublime Text reproduit l'arborescence du serveur : le dossier du site est le
-DOCUMENT_ROOT, « / » des chemins XPX (`/../httpdocs_tools` désigne le dossier voisin).
+DOCUMENT_ROOT, « / » des chemins XPX (`/../dirtools` désigne le dossier voisin).
 Le package relève les définitions `<set name="…" value="…">` du projet et résout les
-variables qui s'enchaînent (`$gRepToolsXPXForms$` → `$gRepTools$/xpxForms` →
-`/../httpdocs_tools/xpxForms`).
+variables qui s'enchaînent (`$pathToolsForms$` → `$pathTools$/myForms` →
+`/../dirtools/myForms`).
 
 - `F12` sur le chemin d'un `<include file="…">` : ouvre le fichier.
 - `F12` sur une variable `$…$` : va à sa définition.
 - Survol du chemin d'un include : chemin réel, avertissement si le fichier est introuvable
-  ou si une variable d'URL (`$gUrl…$`) est utilisée au lieu d'une variable de chemin
-  (`$gRep…$`).
+  ou si une variable d'URL (`$url…$`) est utilisée au lieu d'une variable de chemin
+  (`$path…$`).
 - Survol d'une variable : valeur, valeur résolue, dossier réel, définition(s).
-- Complétion dans `file="…"` : variables `$gRep…$`, puis contenu du dossier.
+- Complétion dans `file="…"` : variables `$path…$`, puis contenu du dossier.
 
 Choix de la valeur d'une variable : surcharge du site choisi (`xpx_site`), sinon fichier de
-définitions (`inc/global.inc.xpx`), sinon définition unique dans le projet. Les dossiers
+définitions (`inc/definitions.inc.xpx`), sinon définition unique dans le projet. Les dossiers
 `archives` sont ignorés. Voir les réglages ci-dessous.
 
 ### Complétion
@@ -121,7 +121,7 @@ de variable » les efface.
   `format` d'un `<get>` (`[get format]`), variables numérotées d'un `<get token>`
   (`[get token]`, la variable racine recevant le nombre d'éléments).
 - Noms calculés résolus avec les valeurs du moment : `$formName$.label` → `myForm.label`,
-  `gUser$gEspace[i]$` → `gUserClient` (`[via …]` rappelle l'expression d'origine).
+  `gUser$gGroupe[i]$` → `gUserClient` (`[via …]` rappelle l'expression d'origine).
 - Portées : `GLOBAL` (niveau 1) ; chaque appel de fonction ajoute un niveau (un include
   non). `<set name>` écrit dans la portée en cours, `<set global>` dans `GLOBAL`,
   `<set return>` dans la portée du dessus ; une variable est cherchée dans la portée en
@@ -142,11 +142,11 @@ de variable » les efface.
 	"translate_tabs_to_spaces": false,
 
 	// Arborescence (peut aussi être placé dans le .sublime-project)
-	"xpx_functional_folders": ["httpdocs_tools", "httpdocs_common"],
-	"xpx_definition_files": ["inc/global.inc.xpx"],
+	"xpx_functional_folders": ["dirtools", "dirfiles"],
+	"xpx_definition_files": ["inc/definitions.inc.xpx"],
 	"xpx_site": "",
-	"xpx_path_variable_prefix": "gRep",
-	"xpx_url_variable_prefix": "gUrl",
+	"xpx_path_variable_prefix": "path",
+	"xpx_url_variable_prefix": "url",
 	"xpx_ignored_folders": ["archives"],
 }
 ```
@@ -157,7 +157,7 @@ Exemple de réglage propre à un projet (`Project › Edit Project`) :
 {
 	"folders": [ … ],
 	"settings": {
-		"xpx_site": "malibu"
+		"xpx_site": "monsite"
 	}
 }
 ```

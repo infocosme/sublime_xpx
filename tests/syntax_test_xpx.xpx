@@ -139,10 +139,10 @@
 
 ###[ VARIABLES DANS LE HTML ]###
 
-  <a href="$gUrlTools$/page.xpx" title="$t$">lien</a>
-##          ^^^^^^^^^ meta.interpolation.xpx variable.other.readwrite.xpx - string
-##                    ^^^^^^^^^ string.quoted.double
-##                                       ^ meta.interpolation.xpx variable.other.readwrite.xpx
+  <a href="$urlTools$/page.xpx" title="$t$">lien</a>
+##          ^^^^^^^^ meta.interpolation.xpx variable.other.readwrite.xpx - string
+##                   ^^^^^^^^^ string.quoted.double
+##                                      ^ meta.interpolation.xpx variable.other.readwrite.xpx
 
   <option value="1" <cond expr="$x$=1">selected</cond>>Un</option>
 ##                   ^^^^ entity.name.tag.xpx

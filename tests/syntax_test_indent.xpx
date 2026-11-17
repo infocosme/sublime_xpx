@@ -1,6 +1,6 @@
 ## SYNTAX TEST reindent-unchanged "Packages/XPX/XPX.sublime-syntax"
-<include file="/inc/global.inc.xpx">
-<include option="once" file="$gRepTools$/xpxForms.methods.xpx" />
+<include file="/inc/definitions.inc.xpx">
+<include option="once" file="$pathTools$/myForms.methods.xpx" />
 <set name="a" value="1">
 <SET NAME="b" VALUE="2">
 <get value="$maDate$" token="-" name="partDate">

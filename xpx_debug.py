@@ -8,7 +8,7 @@ fichier XPX source (« 133:VAR ... »). Le fichier source est déduit :
       fonction -> fichier de définition de la fonction ;
     - sinon en remontant : dernier « INCLUDE FILE=… », « RETURN IN … » ou,
       à défaut, page de départ de « --- START DEBUG … /page.xpx->… » :
-      URL du site, convertie en chemin disque (alias gUrlXxx -> gRepXxx).
+      URL du site, convertie en chemin disque (alias urlXxx -> pathXxx).
 
 F12 :
     ligne numérotée                    fichier source à cette ligne
@@ -220,7 +220,7 @@ MAX_VALUE_LENGTH = 120
 GLOBAL = 'GLOBAL'
 
 # VAR nom ORIGINE=valeur (longueur), éventuellement en chaîne :
-#   VAR i GLOBAL=(1)VAR gEspace1 GLOBAL=Client (6)
+#   VAR i GLOBAL=(1)VAR gGroupe1 GLOBAL=Client (6)
 # ORIGINE : GLOBAL, nom de fonction (portée locale), SQL, SYS, CONFIG, UNKNOWN.
 VAR_LINK_RE = re.compile(r'VAR (\S+) ([^=\s]+?)=\(([^)]*)\)(?=VAR )')
 VAR_LAST_RE = re.compile(r'.*\bVAR (\S+) ([^=\s]+?)=(.*?) \(\d+\)\s*$')

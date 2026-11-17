@@ -184,7 +184,7 @@ def function_parameters(window, function_name):
 # Chemin d'un <include file="...">
 
 def include_completions(view, pt, prefix):
-    """Variables de chemin ($gRep…$) en début de valeur, puis contenu du
+    """Variables de chemin ($path…$) en début de valeur, puis contenu du
     dossier désigné par le début du chemin (après un « / »)."""
     region = xpx_paths.include_file_region(view, pt)
     if not region:
@@ -194,7 +194,7 @@ def include_completions(view, pt, prefix):
     before = view.substr(sublime.Region(region.begin(), pt - len(prefix)))
 
     if before in ('', '$'):
-        var_prefix = xpx_paths.setting(view, 'xpx_path_variable_prefix', 'gRep').lower()
+        var_prefix = xpx_paths.setting(view, 'xpx_path_variable_prefix', 'path').lower()
         lead = '' if before == '$' else '$'
         items = []
         for name in xpx_index.variable_names(window):

@@ -101,7 +101,7 @@ contexts:
     - match: (?=</?(?:{{xpx_tag_names}}|(?i:function){{tag_name_break}}))
       pop: 1
 
-  # Valeur d'un attribut HTML : <a href="$gUrlTools$/page.xpx">
+  # Valeur d'un attribut HTML : <a href="$urlTools$/page.xpx">
   tag-attribute-value-content:
     - meta_prepend: true
     - include: xpx-interpolations

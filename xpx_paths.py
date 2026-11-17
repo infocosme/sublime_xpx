@@ -3,18 +3,18 @@ XPX — variables d'arborescence et chemins des <include>.
 
 Principe : le projet Sublime Text reproduit l'arborescence du serveur. Le
 dossier du site dans le projet est donc le DOCUMENT_ROOT : un chemin XPX
-commençant par « / » part de ce dossier (« /../httpdocs_tools » désigne le
+commençant par « / » part de ce dossier (« /../dirtools » désigne le
 dossier voisin), un chemin relatif part du dossier du fichier courant.
 
 Réglages (XPX.sublime-settings, ou "settings" du fichier .sublime-project) :
     xpx_functional_folders  dossiers partagés, jamais racine du site
-                            (défaut : httpdocs_tools, httpdocs_common)
+                            (défaut : dirtools, dirfiles)
     xpx_definition_files    fichiers de définitions prioritaires
-                            (défaut : inc/global.inc.xpx)
+                            (défaut : inc/definitions.inc.xpx)
     xpx_site                site dont les surcharges s'appliquent
-                            (inc/<site>/xpx.conf, inc/<site>/global.inc.xpx)
-    xpx_path_variable_prefix   préfixe des variables de chemin XPX (gRep)
-    xpx_url_variable_prefix    préfixe des variables d'URL HTML (gUrl)
+                            (inc/<site>/xpx.conf, inc/<site>/definitions.inc.xpx)
+    xpx_path_variable_prefix   préfixe des variables de chemin XPX (path)
+    xpx_url_variable_prefix    préfixe des variables d'URL HTML (url)
     xpx_ignored_folders     dossiers ignorés par l'index (défaut : archives)
 
 Racine du site : premier dossier du projet qui n'est pas un dossier
@@ -22,7 +22,7 @@ fonctionnel.
 
 Choix de la définition d'une variable :
     1. surcharge du site choisi (inc/<site>/...)
-    2. fichiers de définitions (inc/global.inc.xpx)
+    2. fichiers de définitions (inc/definitions.inc.xpx)
     3. définition unique (ou toutes identiques) ailleurs dans le projet
 Sinon la variable n'est pas résolue (valeur dynamique ou ambiguë).
 """
@@ -37,8 +37,8 @@ from .xpx_context import attribute_value_region
 
 VARIABLE_RE = re.compile(r'\$([\w.+\-]+)\$')
 
-DEFAULT_FUNCTIONAL_FOLDERS = ['httpdocs_tools', 'httpdocs_common']
-DEFAULT_DEFINITION_FILES = ['inc/global.inc.xpx']
+DEFAULT_FUNCTIONAL_FOLDERS = ['dirtools', 'dirfiles']
+DEFAULT_DEFINITION_FILES = ['inc/definitions.inc.xpx']
 
 
 def setting(view, key, default):
@@ -160,17 +160,17 @@ def display_path(view, path):
 
 
 def url_to_path(view, url):
-    """Chemin local d'une URL du site (ex. « /tools/xpxForms/x.xpx »).
+    """Chemin local d'une URL du site (ex. « /tools/myForms/x.xpx »).
 
-    Convention : une variable d'URL gUrlXxx a pour équivalent disque la
-    variable de chemin gRepXxx. L'URL est d'abord cherchée telle quelle à
-    partir de la racine du site, puis via le préfixe gUrl le plus long.
+    Convention : une variable d'URL urlXxx a pour équivalent disque la
+    variable de chemin pathXxx. L'URL est d'abord cherchée telle quelle à
+    partir de la racine du site, puis via le préfixe url le plus long.
     """
     path, _ = resolve_path(view, url)
     if path and os.path.exists(path):
         return path
-    url_prefix = setting(view, 'xpx_url_variable_prefix', 'gUrl')
-    path_prefix = setting(view, 'xpx_path_variable_prefix', 'gRep')
+    url_prefix = setting(view, 'xpx_url_variable_prefix', 'url')
+    path_prefix = setting(view, 'xpx_path_variable_prefix', 'path')
     root = site_root(view)
     best = None
     for name in xpx_index.variable_names(view.window()):
@@ -209,8 +209,8 @@ def variable_name_at(view, pt):
 
 
 def uses_url_variable(view, raw):
-    """Vrai si le chemin utilise une variable d'URL (gUrl...)."""
-    prefix = setting(view, 'xpx_url_variable_prefix', 'gUrl').lower()
+    """Vrai si le chemin utilise une variable d'URL (url...)."""
+    prefix = setting(view, 'xpx_url_variable_prefix', 'url').lower()
     return bool(prefix) and any(
         name.lower().startswith(prefix) for name in VARIABLE_RE.findall(raw))
 
