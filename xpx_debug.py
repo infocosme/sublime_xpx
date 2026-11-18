@@ -24,7 +24,7 @@ import re
 import sublime
 import sublime_plugin
 
-from . import xpx_paths
+from .lib import paths as xpx_paths
 
 LINE_NUMBER_RE = re.compile(r'^\s*(\d+):')
 INCLUDE_RE = re.compile(r'^\s*\d*:?\s*INCLUDE FILE=(.+?)\s*$')

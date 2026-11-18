@@ -11,4 +11,21 @@
 		"caption": "XPX Debug: Effacer le suivi de variable",
 		"command": "xpx_debug_clear_tracking"
 	},
+	{
+		"caption": "Preferences: XPX Settings",
+		"command": "edit_settings",
+		"args": {
+			"base_file": "${packages}/XPX/XPX.sublime-settings",
+			"default": "// Réglages XPX de l'utilisateur\n{\n\t$0\n}\n"
+		}
+	},
+	{
+		"caption": "Preferences: XPX Key Bindings",
+		"command": "edit_settings",
+		"args": {
+			"base_file": "${packages}/XPX/Default.sublime-keymap",
+			"user_file": "${packages}/User/Default (${platform}).sublime-keymap",
+			"default": "[\n\t$0\n]\n"
+		}
+	},
 ]

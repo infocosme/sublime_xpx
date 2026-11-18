@@ -22,11 +22,11 @@ import re
 import sublime
 import sublime_plugin
 
-from . import xpx_index, xpx_paths
-from .xpx_context import (
+from .lib import index as xpx_index, paths as xpx_paths
+from .lib.context import (
     current_attribute, existing_attributes, find_current_tag,
     lower_keys, tag_text)
-from .xpx_data import (
+from .lib.data import (
     BLOCK, DUAL, ELSE, INLINE, INTERNAL_VARIABLES, SHORTCUTS, TAGS, tag_snippets)
 
 KIND_TAG = (sublime.KIND_ID_MARKUP, 't', 'Balise XPX')

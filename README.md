@@ -132,7 +132,9 @@ de variable » les efface.
 
 ## Réglages
 
-`Preferences › Settings - Syntax Specific` (avec un fichier XPX ouvert) :
+`Preferences › Package Settings › XPX › Settings` (ou, dans la palette, « Preferences: XPX Settings ») :
+les réglages par défaut s'ouvrent à gauche, les vôtres à droite. Ils peuvent aussi être placés
+dans les `"settings"` du fichier `.sublime-project`.
 
 ```jsonc
 {

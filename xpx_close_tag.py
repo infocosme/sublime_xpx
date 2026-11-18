@@ -25,7 +25,7 @@ import re
 import sublime
 import sublime_plugin
 
-from .xpx_data import INLINE_TAGS
+from .lib.data import INLINE_TAGS
 
 HTML_VOID_ELEMENTS = frozenset((
     'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta',

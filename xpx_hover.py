@@ -28,8 +28,8 @@ import webbrowser
 import sublime
 import sublime_plugin
 
-from . import xpx_index, xpx_paths
-from .xpx_data import BLOCK, DUAL, ELSE, INLINE, TAGS
+from .lib import index as xpx_index, paths as xpx_paths
+from .lib.data import BLOCK, DUAL, ELSE, INLINE, TAGS
 
 # Nombre maximal d'autres définitions affichées pour une variable.
 MAX_OTHER_DEFINITIONS = 5

@@ -19,7 +19,7 @@ import re
 import sublime
 import sublime_plugin
 
-from .xpx_data import INLINE_TAGS
+from .lib.data import INLINE_TAGS
 
 EXEC_RE = re.compile(r'[\s]exec\s*=', re.IGNORECASE)
 
